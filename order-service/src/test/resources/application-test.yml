@@ -1,0 +1,31 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///testdb
+    username: sa
+    password:
+    driver: org.h2.Driver
+  liquibase:
+    url: jdbc:h2:mem:/testdb
+    user: sa
+    password:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+  webflux:
+    multipart:
+      max-in-memory-size: 1MB
+
+server:
+  port: 0
+
+logging:
+  level:
+    dev.makeev.order: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+
+security:
+  enabled: false
+
+mock:
+  external:
+    services: true
