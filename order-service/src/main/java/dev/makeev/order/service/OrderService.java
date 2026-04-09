@@ -115,4 +115,12 @@ public class OrderService {
                 .doOnSuccess(v -> log.info("Deleted order: {}", orderNumber))
                 .doOnError(error -> log.error("Error deleting order {}: {}", orderNumber, error.toString()));
     }
+
+    public Mono<Order> updateOrder(Long orderId, Order order) {
+        log.info("Updating order: {}", orderId);
+        
+        return orderRepository.save(order)
+                .doOnSuccess(updatedOrder -> log.info("Updated order: {}", updatedOrder.getOrderNumber()))
+                .doOnError(error -> log.error("Error updating order {}: {}", orderId, error.toString()));
+    }
 }

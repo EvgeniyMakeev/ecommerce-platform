@@ -40,6 +40,12 @@ public class Order {
 
     private Instant updatedAt;
 
+    private String sagaId;
+    private String compensationData;
+    private String failureReason;
+    private Instant sagaStartedAt;
+    private Instant sagaCompletedAt;
+
     public Order(String userId, List<OrderItem> items, String shippingAddress, String billingAddress) {
         this.orderNumber = UUID.randomUUID().toString();
         this.userId = userId;
@@ -61,6 +67,38 @@ public class Order {
     public void updateTotalAmount() {
         this.totalAmount = calculateTotal(items);
         this.updatedAt = Instant.now();
+    }
+
+    public void startSaga(String sagaId) {
+        this.sagaId = sagaId;
+        this.sagaStartedAt = Instant.now();
+        this.status = OrderStatus.PROCESSING.name();
+        this.updatedAt = Instant.now();
+    }
+
+    public void completeSaga() {
+        this.sagaCompletedAt = Instant.now();
+        this.status = OrderStatus.CONFIRMED.name();
+        this.updatedAt = Instant.now();
+    }
+
+    public void failSaga(String failureReason) {
+        this.failureReason = failureReason;
+        this.status = OrderStatus.CANCELLED.name();
+        this.updatedAt = Instant.now();
+    }
+
+    public void setCompensationData(String compensationData) {
+        this.compensationData = compensationData;
+        this.updatedAt = Instant.now();
+    }
+
+    public boolean isSagaActive() {
+        return sagaStartedAt != null && sagaCompletedAt == null;
+    }
+
+    public boolean hasFailed() {
+        return failureReason != null && !failureReason.trim().isEmpty();
     }
 
     private BigDecimal calculateTotal(List<OrderItem> items) {
