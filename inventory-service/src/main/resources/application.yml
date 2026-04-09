@@ -1,0 +1,35 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: inventory-service
+  
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5434/inventory_db
+    username: ecommerce
+    password: ecommerce123
+    properties:
+      ssl: false
+      maximum-pool-size: 10
+      initial-size: 5
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    dev.makeev.inventory: DEBUG
+    org.springframework.data.r2dbc: DEBUG
+    reactor.netty: INFO
