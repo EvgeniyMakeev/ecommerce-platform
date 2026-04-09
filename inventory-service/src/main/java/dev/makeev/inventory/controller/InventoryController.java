@@ -3,6 +3,10 @@ package dev.makeev.inventory.controller;
 import dev.makeev.inventory.dto.AddStockRequest;
 import dev.makeev.inventory.dto.RemoveStockRequest;
 import dev.makeev.inventory.dto.UpdateQuantityRequest;
+import dev.makeev.inventory.dto.ReserveStockRequest;
+import dev.makeev.inventory.dto.ReleaseStockRequest;
+import dev.makeev.inventory.dto.ConfirmReservationRequest;
+import dev.makeev.inventory.dto.CancelReservationRequest;
 import dev.makeev.inventory.model.Inventory;
 import dev.makeev.inventory.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -130,6 +134,66 @@ public class InventoryController {
 
         return inventoryService.deleteInventory(productId)
                 .then(Mono.just(ResponseEntity.ok().<Void>build()))
-                .onErrorReturn(ResponseEntity.badRequest().<Void>build());
+                .onErrorReturn(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/reserve")
+    public Mono<ResponseEntity<Inventory>> reserveStock(@Valid @RequestBody ReserveStockRequest request) {
+        log.info("REST: Reserve stock request - productId: {}, quantity: {}, orderId: {}",
+                request.productId(), request.quantity(), request.orderId());
+
+        return inventoryService.reserveStock(request.productId(), request.quantity(), request.orderId())
+                .map(ResponseEntity::ok)
+                .onErrorReturn(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/release")
+    public Mono<ResponseEntity<Inventory>> releaseStock(@Valid @RequestBody ReleaseStockRequest request) {
+        log.info("REST: Release stock request - productId: {}, quantity: {}, orderId: {}",
+                request.productId(), request.quantity(), request.orderId());
+
+        return inventoryService.releaseStock(request.productId(), request.quantity(), request.orderId())
+                .map(ResponseEntity::ok)
+                .onErrorReturn(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/confirm-reservation")
+    public Mono<ResponseEntity<Inventory>> confirmReservation(@Valid @RequestBody ConfirmReservationRequest request) {
+        log.info("REST: Confirm reservation request - productId: {}, quantity: {}, orderId: {}",
+                request.productId(), request.quantity(), request.orderId());
+
+        return inventoryService.confirmReservation(request.productId(), request.quantity(), request.orderId())
+                .map(ResponseEntity::ok)
+                .onErrorReturn(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/cancel-reservation")
+    public Mono<ResponseEntity<Inventory>> cancelReservation(@Valid @RequestBody CancelReservationRequest request) {
+        log.info("REST: Cancel reservation request - productId: {}, quantity: {}, orderId: {}",
+                request.productId(), request.quantity(), request.orderId());
+
+        return inventoryService.cancelReservation(request.productId(), request.quantity(), request.orderId())
+                .map(ResponseEntity::ok)
+                .onErrorReturn(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("/reserved")
+    public Flux<Inventory> getReservedItems() {
+        log.info("REST: Get reserved items request");
+        return inventoryService.getReservedItems();
+    }
+
+    @GetMapping("/reserved/orders/{orderId}")
+    public Flux<Inventory> getReservedItemsByOrder(@PathVariable String orderId) {
+        log.info("REST: Get reserved items by order request - orderId: {}", orderId);
+        return inventoryService.getReservedItemsByOrder(orderId);
+    }
+
+    @GetMapping("/available/{productId}")
+    public Mono<ResponseEntity<Integer>> getAvailableStock(@PathVariable String productId) {
+        log.info("REST: Get available stock request - productId: {}", productId);
+        return inventoryService.getAvailableStock(productId)
+                .map(ResponseEntity::ok)
+                .onErrorReturn(ResponseEntity.badRequest().build());
     }
 }
