@@ -2,17 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>dev.makeev</groupId>
         <artifactId>ecommerce-platform</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>cart-service</artifactId>
     <name>Cart Service</name>
     <description>Cart service for e-commerce platform with Redis</description>
-    
+
     <dependencies>
         <dependency>
             <groupId>dev.makeev</groupId>
@@ -58,18 +58,8 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <!-- Testcontainers Redis temporarily removed due to dependency issues -->
-        <!--
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>redis</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        -->
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>

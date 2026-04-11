@@ -13,11 +13,5 @@ public interface InventoryRepository extends R2dbcRepository<Inventory, Long> {
 
     Flux<Inventory> findByLocation(String location);
 
-    Flux<Inventory> findByQuantityGreaterThan(int minQuantity);
-
     Flux<Inventory> findByQuantityLessThan(int maxQuantity);
-
-    Flux<Inventory> findBySku(String sku);
-
-    Mono<Inventory> findByProductIdAndLocation(String productId, String location);
 }

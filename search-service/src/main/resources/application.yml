@@ -4,6 +4,41 @@ server:
 spring:
   application:
     name: search-service
+  
+  # Elasticsearch Configuration
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: changeme
+    
+  # RabbitMQ Configuration for Spring Cloud Stream
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ecommerce
+    password: ecommerce123
+    virtual-host: /
+    
+  # Spring Cloud Stream Configuration
+  cloud:
+    stream:
+      bindings:
+        productEvents-in-0:
+          destination: product.events
+          group: search-service
+          content-type: application/json
+        productEvents-out-0:
+          destination: search.events
+          content-type: application/json
+      rabbit:
+        bindings:
+          productEvents-in-0:
+            consumer:
+              auto-bind-dlq: true
+              acknowledge-mode: manual
+          productEvents-out-0:
+            producer:
+              confirm-mode: correlated
 
 management:
   endpoints:
