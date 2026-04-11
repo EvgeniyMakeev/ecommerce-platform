@@ -1,0 +1,47 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: recommendation-service
+  
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/ecommerce_recommendations
+    username: postgres
+    password: postgres
+  
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+
+  # Consul Discovery Configuration
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: recommendation-service
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        register: true
+        prefer-ip-address: true
+        instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# Logging Configuration
+logging:
+  level:
+    dev.makeev.recommendation: DEBUG
+    org.springframework.r2dbc: INFO
+    io.r2dbc.postgresql: INFO
+
+# Management endpoints for health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

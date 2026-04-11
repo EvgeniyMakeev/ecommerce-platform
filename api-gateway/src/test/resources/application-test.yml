@@ -1,0 +1,19 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    consul:
+      enabled: false
+      discovery:
+        enabled: false
+
+logging:
+  level:
+    dev.makeev.gateway: INFO
+    org.springframework.cloud.gateway: WARN
+    reactor.netty: WARN

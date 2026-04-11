@@ -1,0 +1,16 @@
+INSERT INTO popular_products (product_id, product_name, product_description, category, price, image_url, view_count, purchase_count, rating, popularity_score) VALUES
+('prod-001', 'iPhone 15 Pro Max', 'Latest iPhone with advanced camera system and A17 Pro chip', 'Electronics', 1199.99, 'https://example.com/images/iphone15.jpg', 1500, 250, 4.8, 3.2),
+('prod-002', 'Samsung Galaxy S24 Ultra', 'Premium Android smartphone with S Pen and amazing camera', 'Electronics', 1299.99, 'https://example.com/images/galaxy-s24.jpg', 1200, 180, 4.7, 2.9),
+('prod-003', 'MacBook Pro 16"', 'Powerful laptop with M3 Max chip for professionals', 'Electronics', 2499.99, 'https://example.com/images/macbook-pro.jpg', 800, 120, 4.9, 2.6),
+('prod-004', 'AirPods Pro 2', 'Wireless earbuds with active noise cancellation', 'Electronics', 249.99, 'https://example.com/images/airpods-pro.jpg', 2000, 450, 4.6, 3.8),
+('prod-005', 'Nike Air Max 90', 'Classic running shoes with iconic design', 'Fashion', 129.99, 'https://example.com/images/nike-airmax.jpg', 900, 150, 4.4, 2.3),
+('prod-006', 'Levi''s 501 Original Jeans', 'Classic straight-fit jeans in vintage denim', 'Fashion', 89.99, 'https://example.com/images/levis-501.jpg', 750, 200, 4.5, 2.7),
+('prod-007', 'Sony WH-1000XM5', 'Premium noise-canceling headphones', 'Electronics', 399.99, 'https://example.com/images/sony-headphones.jpg', 600, 90, 4.8, 2.1),
+('prod-008', 'Adidas Ultraboost 22', 'High-performance running shoes with responsive cushioning', 'Fashion', 189.99, 'https://example.com/images/ultraboost.jpg', 450, 80, 4.3, 1.9),
+('prod-009', 'iPad Pro 12.9"', 'Professional tablet with M2 chip and stunning display', 'Electronics', 1099.99, 'https://example.com/images/ipad-pro.jpg', 550, 70, 4.7, 1.8),
+('prod-010', 'Dyson V15 Detect', 'Advanced vacuum cleaner with laser dust detection', 'Home', 749.99, 'https://example.com/images/dyson-v15.jpg', 380, 60, 4.6, 1.6),
+('prod-011', 'Instant Pot Duo 7-in-1', 'Multi-cooker with various cooking functions', 'Home', 79.99, 'https://example.com/images/instant-pot.jpg', 920, 280, 4.4, 2.8),
+('prod-012', 'Kindle Paperwhite', 'Waterproof e-reader with adjustable warm light', 'Electronics', 139.99, 'https://example.com/images/kindle-paperwhite.jpg', 680, 110, 4.5, 2.2),
+('prod-013', 'YETI Rambler 30oz', 'Insulated stainless steel tumbler', 'Home', 34.99, 'https://example.com/images/yeti-rambler.jpg', 1500, 320, 4.7, 3.1),
+('prod-014', 'Bose QuietComfort 45', 'Comfortable noise-canceling headphones', 'Electronics', 329.99, 'https://example.com/images/bose-qc45.jpg', 420, 75, 4.5, 1.7),
+('prod-015', 'Fitbit Charge 6', 'Advanced fitness tracker with health monitoring', 'Electronics', 149.99, 'https://example.com/images/fitbit-charge6.jpg', 320, 55, 4.2, 1.4);

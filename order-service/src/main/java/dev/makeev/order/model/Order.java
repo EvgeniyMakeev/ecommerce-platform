@@ -85,6 +85,7 @@ public class Order {
     public void failSaga(String failureReason) {
         this.failureReason = failureReason;
         this.status = OrderStatus.CANCELLED.name();
+        this.sagaCompletedAt = Instant.now();
         this.updatedAt = Instant.now();
     }
 

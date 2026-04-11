@@ -6,9 +6,14 @@ import dev.makeev.order.saga.SagaOrchestrator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -16,13 +21,42 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TestConfig.class, SagaOrchestratorTest.TestSagaConfig.class})
 @ActiveProfiles("test")
-public class SagaOrchestratorTest {
+class SagaOrchestratorTest {
 
     @Autowired
     private SagaOrchestrator sagaOrchestrator;
+
+    @TestConfiguration
+    static class TestSagaConfig {
+        @Bean
+        public SagaOrchestrator sagaOrchestrator(
+                dev.makeev.order.service.OrderService orderService,
+                dev.makeev.order.client.InventoryServiceClient inventoryServiceClient,
+                dev.makeev.order.client.PaymentServiceClient paymentServiceClient,
+                dev.makeev.order.client.NotificationServiceClient notificationServiceClient) {
+            return new SagaOrchestrator(orderService, inventoryServiceClient, paymentServiceClient, notificationServiceClient);
+        }
+        
+        @Bean
+        public dev.makeev.order.service.OrderService orderService() {
+            dev.makeev.order.service.OrderService mockService = Mockito.mock(dev.makeev.order.service.OrderService.class);
+            Mockito.when(mockService.createOrder(any(String.class), any(List.class), any(String.class), any(String.class)))
+                    .thenReturn(Mono.just(new Order()));
+            Mockito.when(mockService.updateOrder(any(Long.class), any(Order.class)))
+                    .thenReturn(Mono.just(new Order()));
+            return mockService;
+        }
+        
+        @Bean
+        public dev.makeev.order.repository.OrderRepository orderRepository() {
+            return Mockito.mock(dev.makeev.order.repository.OrderRepository.class);
+        }
+    }
 
     private Order testOrder;
 

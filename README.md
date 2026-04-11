@@ -76,25 +76,3 @@ curl -u ecommerce:ecommerce123 http://localhost:15672/api/overview
 # Elasticsearch
 curl http://localhost:9200/_cluster/health?pretty
 ```
-
-## Следующие шаги
-
-- [ ] Реализация Common module
-- [ ] Реализация Product Service
-- [ ] Реализация Search Service
-- [ ] Реализация Cart Service
-- [ ] Реализация Order Service с Saga pattern
-- [ ] Реализация Inventory Service
-- [ ] Реализация Recommendation Service
-- [ ] Реализация API Gateway
-
-## Разработка
-
-```bash
-# Сборка всех модулей
-mvn clean install
-
-# Запуск конкретного сервиса
-cd product-service
-mvn spring-boot:run
-```

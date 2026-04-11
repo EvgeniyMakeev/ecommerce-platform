@@ -1,0 +1,159 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Product Service Routes
+        - id: product-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/products/**,/api/categories/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: productCircuitBreaker
+                fallbackUri: forward:/fallback/product
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                methods: GET,POST,PUT,DELETE
+
+        # Search Service Routes
+        - id: search-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/search/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: searchCircuitBreaker
+                fallbackUri: forward:/fallback/search
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+
+        # Cart Service Routes
+        - id: cart-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/cart/**,/api/carts/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: cartCircuitBreaker
+                fallbackUri: forward:/fallback/cart
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+
+        # Inventory Service Routes
+        - id: inventory-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/inventory/**,/api/inventories/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: inventoryCircuitBreaker
+                fallbackUri: forward:/fallback/inventory
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+
+        # Order Service Routes
+        - id: order-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/orders/**,/api/order/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: orderCircuitBreaker
+                fallbackUri: forward:/fallback/order
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+
+      # Global CORS configuration
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000,http://localhost:4200"
+            allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+    # Circuit Breaker Configuration
+    circuitbreaker:
+      resilience4j:
+        instances:
+          productCircuitBreaker:
+            failureRateThreshold: 50
+            waitDurationInOpenState: 30s
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+          searchCircuitBreaker:
+            failureRateThreshold: 60
+            waitDurationInOpenState: 20s
+            slidingWindowSize: 8
+            minimumNumberOfCalls: 4
+          cartCircuitBreaker:
+            failureRateThreshold: 40
+            waitDurationInOpenState: 25s
+            slidingWindowSize: 12
+            minimumNumberOfCalls: 6
+          inventoryCircuitBreaker:
+            failureRateThreshold: 50
+            waitDurationInOpenState: 30s
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+          orderCircuitBreaker:
+            failureRateThreshold: 30
+            waitDurationInOpenState: 35s
+            slidingWindowSize: 15
+            minimumNumberOfCalls: 8
+
+    # Consul Discovery Configuration
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: api-gateway
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        register: true
+
+# Logging Configuration
+logging:
+  level:
+    dev.makeev.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.netty: DEBUG
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway,circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
