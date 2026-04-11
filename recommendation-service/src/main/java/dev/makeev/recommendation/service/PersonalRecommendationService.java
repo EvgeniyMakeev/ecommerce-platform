@@ -64,17 +64,19 @@ public class PersonalRecommendationService {
                                 .take(10) // Their purchases
                                 .filter(activity -> !userAlreadyPurchased(userId, activity.getProductId()))
                 )
-                .map(activity -> new UserRecommendation(
-                        userId,
-                        activity.getProductId(),
-                        activity.getProductName(),
-                        activity.getCategory(),
-                        activity.getPrice(),
-                        null, // imageUrl would be fetched from product service
-                        RecommendationType.COLLABORATIVE_FILTERING,
-                        calculateCollaborativeScore(userId, activity.getProductId()),
-                        "Users who bought this also liked"
-                ))
+                .map(activity -> UserRecommendation.builder()
+                        .userId(userId)
+                        .productId(activity.getProductId())
+                        .productName(activity.getProductName())
+                        .category(activity.getCategory())
+                        .price(activity.getPrice())
+                        .imageUrl(null) // imageUrl would be fetched from product service
+                        .recommendationType(RecommendationType.COLLABORATIVE_FILTERING)
+                        .recommendationScore(calculateCollaborativeScore(userId, activity.getProductId()))
+                        .reason("Users who bought this also liked")
+                        .createdAt(LocalDateTime.now())
+                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .build())
                 .take(limit);
     }
 
@@ -114,17 +116,19 @@ public class PersonalRecommendationService {
                             .filter(product -> !userAlreadyInteracted(userId, product.getProductId()))
                             .map(product -> {
                                 double score = categoryPreferences.getOrDefault(product.getCategory(), 0) * 0.1;
-                                return new UserRecommendation(
-                                        userId,
-                                        product.getProductId(),
-                                        product.getProductName(),
-                                        product.getCategory(),
-                                        product.getPrice().doubleValue(),
-                                        product.getImageUrl(),
-                                        RecommendationType.CONTENT_BASED,
-                                        score,
-                                        "Based on your interests in " + product.getCategory()
-                                );
+                                return UserRecommendation.builder()
+                                        .userId(userId)
+                                        .productId(product.getProductId())
+                                        .productName(product.getProductName())
+                                        .category(product.getCategory())
+                                        .price(product.getPrice().doubleValue())
+                                        .imageUrl(product.getImageUrl())
+                                        .recommendationType(RecommendationType.CONTENT_BASED)
+                                        .recommendationScore(score)
+                                        .reason("Based on your interests in " + product.getCategory())
+                                        .createdAt(LocalDateTime.now())
+                                        .expiresAt(LocalDateTime.now().plusDays(7))
+                                        .build();
                             });
                 })
                 .take(limit);
@@ -149,17 +153,19 @@ public class PersonalRecommendationService {
                                 .take(limit / 3)
                 )
                 .filter(product -> !userAlreadyInteracted(userId, product.getProductId()))
-                .map(product -> new UserRecommendation(
-                        userId,
-                        product.getProductId(),
-                        product.getProductName(),
-                        product.getCategory(),
-                        product.getPrice().doubleValue(),
-                        product.getImageUrl(),
-                        RecommendationType.CATEGORY_BASED,
-                        product.getPopularityScore(),
-                        "Popular in " + product.getCategory()
-                ))
+                .map(product -> UserRecommendation.builder()
+                        .userId(userId)
+                        .productId(product.getProductId())
+                        .productName(product.getProductName())
+                        .category(product.getCategory())
+                        .price(product.getPrice().doubleValue())
+                        .imageUrl(product.getImageUrl())
+                        .recommendationType(RecommendationType.CATEGORY_BASED)
+                        .recommendationScore(product.getPopularityScore())
+                        .reason("Popular in " + product.getCategory())
+                        .createdAt(LocalDateTime.now())
+                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .build())
                 .take(limit);
     }
 
@@ -184,17 +190,19 @@ public class PersonalRecommendationService {
                                 .take(1)
                 )
                 .filter(product -> !userAlreadyInteracted(userId, product.getProductId()))
-                .map(product -> new UserRecommendation(
-                        userId,
-                        product.getProductId(),
-                        product.getProductName(),
-                        product.getCategory(),
-                        product.getPrice().doubleValue(),
-                        product.getImageUrl(),
-                        RecommendationType.CROSS_SELL,
-                        product.getPopularityScore(),
-                        "Frequently bought together with your items"
-                ))
+                .map(product -> UserRecommendation.builder()
+                        .userId(userId)
+                        .productId(product.getProductId())
+                        .productName(product.getProductName())
+                        .category(product.getCategory())
+                        .price(product.getPrice().doubleValue())
+                        .imageUrl(product.getImageUrl())
+                        .recommendationType(RecommendationType.CROSS_SELL)
+                        .recommendationScore(product.getPopularityScore())
+                        .reason("Frequently bought together with your items")
+                        .createdAt(LocalDateTime.now())
+                        .expiresAt(LocalDateTime.now().plusDays(7))
+                        .build())
                 .take(limit);
     }
 
@@ -203,7 +211,15 @@ public class PersonalRecommendationService {
                                               String sessionId) {
         log.info("Tracking activity: {} for user: {} on product: {}", activityType, userId, productId);
         
-        UserActivity activity = new UserActivity(userId, productId, productName, category, activityType, sessionId);
+        UserActivity activity = UserActivity.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName(productName)
+                .category(category)
+                .activityType(activityType)
+                .sessionId(sessionId)
+                .createdAt(LocalDateTime.now())
+                .build();
         
         return userActivityRepository.save(activity)
                 .doOnSuccess(savedActivity -> {
@@ -224,8 +240,17 @@ public class PersonalRecommendationService {
         log.info("Tracking activity: {} for user: {} on product: {} with price: {}", 
                 activityType, userId, productId, price);
         
-        UserActivity activity = new UserActivity(userId, productId, productName, category, 
-                activityType, sessionId, price, quantity);
+        UserActivity activity = UserActivity.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName(productName)
+                .category(category)
+                .activityType(activityType)
+                .sessionId(sessionId)
+                .price(price)
+                .quantity(quantity)
+                .createdAt(LocalDateTime.now())
+                .build();
         
         return userActivityRepository.save(activity)
                 .doOnSuccess(savedActivity -> 

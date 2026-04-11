@@ -4,12 +4,14 @@ import dev.makeev.common.dto.ProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDocument {
@@ -25,17 +27,17 @@ public class ProductDocument {
     private Instant updatedAt;
 
     public static ProductDocument from(ProductDTO productDTO) {
-        ProductDocument doc = new ProductDocument();
-        doc.id = productDTO.id();
-        doc.name = productDTO.name();
-        doc.description = productDTO.description();
-        doc.price = productDTO.price();
-        doc.category = productDTO.category();
-        doc.tags = productDTO.tags();
-        doc.imageUrl = productDTO.imageUrl();
-        doc.createdAt = productDTO.createdAt();
-        doc.updatedAt = productDTO.updatedAt();
-        return doc;
+        return ProductDocument.builder()
+                .id(productDTO.id())
+                .name(productDTO.name())
+                .description(productDTO.description())
+                .price(productDTO.price())
+                .category(productDTO.category())
+                .tags(productDTO.tags())
+                .imageUrl(productDTO.imageUrl())
+                .createdAt(productDTO.createdAt())
+                .updatedAt(productDTO.updatedAt())
+                .build();
     }
 
     public ProductDTO toDTO() {

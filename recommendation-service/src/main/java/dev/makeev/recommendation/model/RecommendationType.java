@@ -1,5 +1,8 @@
 package dev.makeev.recommendation.model;
 
+import lombok.Getter;
+
+@Getter
 public enum RecommendationType {
     COLLABORATIVE_FILTERING("collaborative", "Based on similar users"),
     CONTENT_BASED("content", "Based on your preferences"),
@@ -16,6 +19,4 @@ public enum RecommendationType {
         this.description = description;
     }
     
-    public String getCode() { return code; }
-    public String getDescription() { return description; }
 }

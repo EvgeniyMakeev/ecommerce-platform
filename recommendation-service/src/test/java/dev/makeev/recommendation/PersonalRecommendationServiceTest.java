@@ -69,8 +69,14 @@ class PersonalRecommendationServiceTest {
         ActivityType activityType = ActivityType.VIEW;
         String sessionId = "session1";
         
-        UserActivity expectedActivity = new UserActivity(userId, productId, productName, 
-                category, activityType, sessionId);
+        UserActivity expectedActivity = UserActivity.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName(productName)
+                .category(category)
+                .activityType(activityType)
+                .sessionId(sessionId)
+                .build();
         
         when(userActivityRepository.save(any(UserActivity.class)))
                 .thenReturn(Mono.just(expectedActivity));
@@ -93,8 +99,16 @@ class PersonalRecommendationServiceTest {
         Double price = 1199.99;
         Integer quantity = 1;
         
-        UserActivity expectedActivity = new UserActivity(userId, productId, productName, 
-                category, activityType, sessionId, price, quantity);
+        UserActivity expectedActivity = UserActivity.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName(productName)
+                .category(category)
+                .activityType(activityType)
+                .sessionId(sessionId)
+                .price(price)
+                .quantity(quantity)
+                .build();
         
         when(userActivityRepository.save(any(UserActivity.class)))
                 .thenReturn(Mono.just(expectedActivity));
@@ -111,9 +125,19 @@ class PersonalRecommendationServiceTest {
         String userId = "user123";
         String productId = "prod-001";
         
-        UserRecommendation recommendation = new UserRecommendation(userId, productId, "iPhone 15", 
-                "Electronics", 1199.99, null, RecommendationType.CONTENT_BASED, 
-                0.8, "Based on your interests");
+        UserRecommendation recommendation = UserRecommendation.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName("iPhone 15")
+                .category("Electronics")
+                .price(1199.99)
+                .imageUrl(null)
+                .recommendationType(RecommendationType.CONTENT_BASED)
+                .recommendationScore(0.8)
+                .reason("Based on your interests")
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusDays(7))
+                .build();
         
         when(userRecommendationRepository.findByUserIdAndClickedFalseAndExpiresAtAfterOrderByRecommendationScoreDesc(
                 eq(userId), any(LocalDateTime.class)))
@@ -133,9 +157,19 @@ class PersonalRecommendationServiceTest {
         String userId = "user123";
         String productId = "prod-001";
         
-        UserRecommendation recommendation = new UserRecommendation(userId, productId, "iPhone 15", 
-                "Electronics", 1199.99, null, RecommendationType.CONTENT_BASED, 
-                0.8, "Based on your interests");
+        UserRecommendation recommendation = UserRecommendation.builder()
+                .userId(userId)
+                .productId(productId)
+                .productName("iPhone 15")
+                .category("Electronics")
+                .price(1199.99)
+                .imageUrl(null)
+                .recommendationType(RecommendationType.CONTENT_BASED)
+                .recommendationScore(0.8)
+                .reason("Based on your interests")
+                .createdAt(LocalDateTime.now())
+                .expiresAt(LocalDateTime.now().plusDays(7))
+                .build();
         
         when(userRecommendationRepository.findByUserIdAndClickedFalseAndExpiresAtAfterOrderByRecommendationScoreDesc(
                 eq(userId), any(LocalDateTime.class)))

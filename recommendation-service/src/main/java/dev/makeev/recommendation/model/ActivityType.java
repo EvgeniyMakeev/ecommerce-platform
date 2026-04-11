@@ -1,5 +1,8 @@
 package dev.makeev.recommendation.model;
 
+import lombok.Getter;
+
+@Getter
 public enum ActivityType {
     VIEW("view", "Product viewed"),
     SEARCH("search", "Product searched"),
@@ -18,6 +21,4 @@ public enum ActivityType {
         this.description = description;
     }
     
-    public String getCode() { return code; }
-    public String getDescription() { return description; }
 }

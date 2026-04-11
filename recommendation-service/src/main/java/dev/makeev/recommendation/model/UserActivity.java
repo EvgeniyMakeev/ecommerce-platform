@@ -3,6 +3,7 @@ package dev.makeev.recommendation.model;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
@@ -10,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("user_activities")
@@ -51,30 +53,4 @@ public class UserActivity {
     @Column("context")
     private String context;
 
-    public UserActivity(String userId, String productId, String productName, 
-                       String category, ActivityType activityType, 
-                       String sessionId) {
-        this.userId = userId;
-        this.productId = productId;
-        this.productName = productName;
-        this.category = category;
-        this.activityType = activityType;
-        this.sessionId = sessionId;
-        this.createdAt = LocalDateTime.now();
-    }
-    
-    public UserActivity(String userId, String productId, String productName, 
-                       String category, ActivityType activityType, 
-                       String sessionId, Double price, Integer quantity) {
-        this(userId, productId, productName, category, activityType, sessionId);
-        this.price = price;
-        this.quantity = quantity;
-    }
-    
-    public UserActivity(String userId, String productId, String productName, 
-                       String category, ActivityType activityType, 
-                       String sessionId, Integer durationSeconds) {
-        this(userId, productId, productName, category, activityType, sessionId);
-        this.durationSeconds = durationSeconds;
-    }
 }

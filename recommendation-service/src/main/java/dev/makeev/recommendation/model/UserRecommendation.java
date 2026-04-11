@@ -3,6 +3,7 @@ package dev.makeev.recommendation.model;
 import lombok.Data;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
@@ -10,6 +11,7 @@ import org.springframework.data.relational.core.mapping.Column;
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("user_recommendations")
@@ -64,22 +66,6 @@ public class UserRecommendation {
     private LocalDateTime purchasedAt;
     
     
-    public UserRecommendation(String userId, String productId, String productName, 
-                             String category, Double price, String imageUrl,
-                             RecommendationType recommendationType, 
-                             Double recommendationScore, String reason) {
-        this.userId = userId;
-        this.productId = productId;
-        this.productName = productName;
-        this.category = category;
-        this.price = price;
-        this.imageUrl = imageUrl;
-        this.recommendationType = recommendationType;
-        this.recommendationScore = recommendationScore;
-        this.reason = reason;
-        this.createdAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusDays(7); // Recommendations expire in 7 days
-    }
     
     public void markAsClicked() {
         this.clicked = true;
@@ -89,9 +75,5 @@ public class UserRecommendation {
     public void markAsPurchased() {
         this.purchased = true;
         this.purchasedAt = LocalDateTime.now();
-    }
-    
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
     }
 }

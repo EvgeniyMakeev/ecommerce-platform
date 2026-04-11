@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -32,13 +32,13 @@ class RateLimitFilterTest {
     @Autowired
     private SimpleRateLimitFilter rateLimitFilter;
 
-    @MockitoBean
+    @MockBean
     private GatewayFilterChain filterChain;
     
-    @MockitoBean
+    @MockBean
     private ReactiveRedisTemplate<String, String> redisTemplate;
     
-    @MockitoBean
+    @MockBean
     private ReactiveValueOperations<String, String> valueOperations;
 
     @Test
