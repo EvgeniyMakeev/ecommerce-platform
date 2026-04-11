@@ -10,11 +10,10 @@ spring:
     username: postgres
     password: postgres
   
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   # Consul Discovery Configuration
   cloud:
