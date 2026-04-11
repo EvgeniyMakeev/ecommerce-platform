@@ -4,6 +4,18 @@ server:
 spring:
   application:
     name: api-gateway
+  
+  # Redis for Rate Limiting
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   cloud:
     consul:
       host: localhost
@@ -25,6 +37,7 @@ spring:
             - Path=/api/search/**
           filters:
             - StripPrefix=1
+            - SimpleRateLimit=ip,100,60
 
         # Cart Service Routes
         - id: cart-service
@@ -33,6 +46,7 @@ spring:
             - Path=/api/cart/**,/api/carts/**
           filters:
             - StripPrefix=1
+            - SimpleRateLimit=ip,100,60
 
         # Inventory Service Routes
         - id: inventory-service
@@ -41,6 +55,7 @@ spring:
             - Path=/api/inventory/**,/api/inventories/**
           filters:
             - StripPrefix=1
+            - SimpleRateLimit=ip,100,60
 
         # Order Service Routes
         - id: order-service
@@ -49,6 +64,7 @@ spring:
             - Path=/api/orders/**,/api/order/**
           filters:
             - StripPrefix=1
+            - SimpleRateLimit=ip,20,60
 
         # Recommendation Service Routes
         - id: recommendation-service
@@ -57,6 +73,7 @@ spring:
             - Path=/api/recommendations/**
           filters:
             - StripPrefix=1
+            - SimpleRateLimit=ip,1000,60
 
       # Global CORS configuration
       globalcors:
