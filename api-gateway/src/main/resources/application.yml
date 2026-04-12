@@ -8,8 +8,8 @@ spring:
   # Redis for Rate Limiting
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
       timeout: 2000ms
       lettuce:
         pool:
@@ -17,63 +17,43 @@ spring:
           max-idle: 8
           min-idle: 0
   cloud:
-    consul:
-      host: localhost
-      port: 8500
     gateway:
       routes:
         # Product Service Routes
         - id: product-service
-          uri: lb://product-service
+          uri: http://product-service:8081
           predicates:
             - Path=/api/products/**,/api/categories/**
-          filters:
-            - StripPrefix=1
 
         # Search Service Routes
         - id: search-service
-          uri: lb://search-service
+          uri: http://search-service:8082
           predicates:
             - Path=/api/search/**
-          filters:
-            - StripPrefix=1
-            - SimpleRateLimit=ip,100,60
 
         # Cart Service Routes
         - id: cart-service
-          uri: lb://cart-service
+          uri: http://cart-service:8083
           predicates:
             - Path=/api/cart/**,/api/carts/**
-          filters:
-            - StripPrefix=1
-            - SimpleRateLimit=ip,100,60
 
         # Inventory Service Routes
         - id: inventory-service
-          uri: lb://inventory-service
+          uri: http://inventory-service:8084
           predicates:
             - Path=/api/inventory/**,/api/inventories/**
-          filters:
-            - StripPrefix=1
-            - SimpleRateLimit=ip,100,60
 
         # Order Service Routes
         - id: order-service
-          uri: lb://order-service
+          uri: http://order-service:8085
           predicates:
             - Path=/api/orders/**,/api/order/**
-          filters:
-            - StripPrefix=1
-            - SimpleRateLimit=ip,20,60
 
         # Recommendation Service Routes
         - id: recommendation-service
-          uri: lb://recommendation-service
+          uri: http://recommendation-service:8086
           predicates:
             - Path=/api/recommendations/**
-          filters:
-            - StripPrefix=1
-            - SimpleRateLimit=ip,1000,60
 
       # Global CORS configuration
       globalcors:

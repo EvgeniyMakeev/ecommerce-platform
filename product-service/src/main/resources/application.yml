@@ -1,13 +1,13 @@
 server:
-  port: 8092
+  port: 8081
 
 spring:
   application:
     name: product-service
   r2dbc:
-    url: r2dbc:postgresql://localhost:5435/product_db
-    username: ecommerce
-    password: ecommerce123
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5435/product_db}
+    username: ${SPRING_R2DBC_USERNAME:ecommerce}
+    password: ${SPRING_R2DBC_PASSWORD:ecommerce123}
     pool:
       initial-size: 10
       max-size: 20
@@ -17,10 +17,10 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   rabbitmq:
-    host: localhost
-    port: 5673
-    username: ecommerce
-    password: ecommerce123
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:ecommerce}
+    password: ${SPRING_RABBITMQ_PASSWORD:ecommerce123}
 
 management:
   endpoints:

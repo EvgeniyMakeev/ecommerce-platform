@@ -15,19 +15,6 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # Consul Discovery Configuration
-  cloud:
-    consul:
-      host: localhost
-      port: 8500
-      discovery:
-        service-name: recommendation-service
-        health-check-path: /actuator/health
-        health-check-interval: 10s
-        register: true
-        prefer-ip-address: true
-        instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
 # Logging Configuration
 logging:
   level:

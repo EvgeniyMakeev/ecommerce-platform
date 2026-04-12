@@ -127,16 +127,6 @@ spring:
             slidingWindowSize: 15
             minimumNumberOfCalls: 8
 
-    # Consul Discovery Configuration
-    consul:
-      host: localhost
-      port: 8500
-      discovery:
-        service-name: api-gateway
-        health-check-path: /actuator/health
-        health-check-interval: 10s
-        register: true
-
 # Logging Configuration
 logging:
   level:

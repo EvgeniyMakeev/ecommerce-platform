@@ -7,16 +7,14 @@ spring:
   
   # Elasticsearch Configuration
   elasticsearch:
-    uris: http://localhost:9200
-    username: elastic
-    password: changeme
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
     
   # RabbitMQ Configuration for Spring Cloud Stream
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: ecommerce
-    password: ecommerce123
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:ecommerce}
+    password: ${SPRING_RABBITMQ_PASSWORD:ecommerce123}
     virtual-host: /
     
   # Spring Cloud Stream Configuration
@@ -48,6 +46,9 @@ management:
   endpoint:
     health:
       show-details: always
+  health:
+    elasticsearch:
+      enabled: false
 
 logging:
   level:

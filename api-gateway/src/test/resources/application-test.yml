@@ -7,10 +7,10 @@ spring:
   main:
     web-application-type: reactive
   cloud:
-    consul:
-      enabled: false
+    gateway:
       discovery:
-        enabled: false
+        locator:
+          enabled: false
 
 logging:
   level:

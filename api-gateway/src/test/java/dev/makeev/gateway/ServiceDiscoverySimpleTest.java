@@ -27,14 +27,4 @@ class ServiceDiscoverySimpleTest {
         }
     }
 
-    @Test
-    @DisplayName("Consul discovery configuration should be available")
-    void testConsulConfiguration() {
-        try {
-            Class<?> consulClass = Class.forName("org.springframework.cloud.consul.discovery.ConsulDiscoveryProperties");
-            assertThat(consulClass).isNotNull();
-        } catch (ClassNotFoundException e) {
-            assertThat(true).isTrue();
-        }
-    }
 }
