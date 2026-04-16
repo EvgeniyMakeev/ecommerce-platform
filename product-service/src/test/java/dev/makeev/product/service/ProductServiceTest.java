@@ -2,6 +2,7 @@ package dev.makeev.product.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.makeev.common.config.ProductBindings;
 import dev.makeev.common.dto.ProductDTO;
 import dev.makeev.common.events.ProductEvent;
 import dev.makeev.product.model.Product;
@@ -15,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.dao.DataAccessResourceFailureException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,7 +41,7 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Mock
-    private RabbitTemplate rabbitTemplate;
+    private StreamBridge streamBridge;
 
     @Mock
     private ObjectMapper objectMapper;
@@ -91,7 +92,7 @@ class ProductServiceTest {
         );
 
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(testProduct));
-        doNothing().when(rabbitTemplate).convertAndSend(anyString(), (Object) any(ProductEvent.class));
+        when(streamBridge.send(anyString(), any(ProductEvent.class))).thenReturn(true);
 
         StepVerifier.create(productService.createProduct(createDTO))
                 .assertNext(dto -> {
@@ -108,7 +109,7 @@ class ProductServiceTest {
                 .verifyComplete();
 
         verify(productRepository).save(any(Product.class));
-        verify(rabbitTemplate).convertAndSend(eq("product.events"), (Object) any(ProductEvent.class));
+        verify(streamBridge).send(eq(ProductBindings.PRODUCT_EVENTS_OUTPUT.getBindingName()), any(ProductEvent.class));
     }
 
     @Test
@@ -134,7 +135,7 @@ class ProductServiceTest {
                 .verify();
 
         verify(productRepository).save(any(Product.class));
-        verify(rabbitTemplate, never()).convertAndSend(anyString(), (Object) any());
+        verify(streamBridge, never()).send(anyString(), any());
     }
 
     @Test
@@ -154,7 +155,7 @@ class ProductServiceTest {
 
         when(productRepository.findById(TEST_ID)).thenReturn(Mono.just(testProduct));
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(testProduct));
-        doNothing().when(rabbitTemplate).convertAndSend(anyString(), (Object) any(ProductEvent.class));
+        when(streamBridge.send(anyString(), any(ProductEvent.class))).thenReturn(true);
 
         StepVerifier.create(productService.updateProduct(TEST_ID, updateDTO))
                 .assertNext(dto -> {
@@ -168,7 +169,7 @@ class ProductServiceTest {
 
         verify(productRepository).findById(TEST_ID);
         verify(productRepository).save(any(Product.class));
-        verify(rabbitTemplate).convertAndSend(eq("product.events"), (Object) any(ProductEvent.class));
+        verify(streamBridge).send(eq(ProductBindings.PRODUCT_EVENTS_OUTPUT.getBindingName()), any(ProductEvent.class));
     }
 
     @Test
@@ -195,7 +196,7 @@ class ProductServiceTest {
 
         verify(productRepository).findById(TEST_ID);
         verify(productRepository, never()).save(any());
-        verify(rabbitTemplate, never()).convertAndSend(anyString(), (Object) any());
+        verify(streamBridge, never()).send(anyString(), any());
     }
 
     @Test
@@ -203,14 +204,14 @@ class ProductServiceTest {
     void deleteProduct_Success() {
         when(productRepository.findById(TEST_ID)).thenReturn(Mono.just(testProduct));
         when(productRepository.deleteById(TEST_ID)).thenReturn(Mono.empty());
-        doNothing().when(rabbitTemplate).convertAndSend(anyString(), (Object) any(ProductEvent.class));
+        when(streamBridge.send(anyString(), any(ProductEvent.class))).thenReturn(true);
 
         StepVerifier.create(productService.deleteProduct(TEST_ID))
                 .verifyComplete();
 
         verify(productRepository).findById(TEST_ID);
         verify(productRepository).deleteById(TEST_ID);
-        verify(rabbitTemplate).convertAndSend(eq("product.events"), (Object) any(ProductEvent.class));
+        verify(streamBridge).send(eq("productEvents-out-0"), any(ProductEvent.class));
     }
 
     @Test
@@ -225,7 +226,7 @@ class ProductServiceTest {
 
         verify(productRepository).findById(TEST_ID);
         verify(productRepository, never()).deleteById(anyString());
-        verify(rabbitTemplate, never()).convertAndSend(anyString(), (Object) any());
+        verify(streamBridge, never()).send(anyString(), any());
     }
 
     @Test
@@ -339,7 +340,7 @@ class ProductServiceTest {
                 .verify();
 
         verify(productRepository, never()).save(any());
-        verify(rabbitTemplate, never()).convertAndSend(anyString(), (Object) any());
+        verify(streamBridge, never()).send(anyString(), any());
     }
 
     @Test
@@ -397,7 +398,7 @@ class ProductServiceTest {
 
         when(objectMapper.writeValueAsString(List.of())).thenReturn("[]");
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(productWithEmptyTags));
-        doNothing().when(rabbitTemplate).convertAndSend(anyString(), (Object) any(ProductEvent.class));
+        when(streamBridge.send(anyString(), any(ProductEvent.class))).thenReturn(true);
         when(objectMapper.readValue("[]", String[].class)).thenReturn(new String[0]);
 
         StepVerifier.create(productService.createProduct(createDTO))
@@ -405,7 +406,7 @@ class ProductServiceTest {
                 .verifyComplete();
 
         verify(productRepository).save(any(Product.class));
-        verify(rabbitTemplate).convertAndSend(eq("product.events"), (Object) any(ProductEvent.class));
+        verify(streamBridge).send(eq(ProductBindings.PRODUCT_EVENTS_OUTPUT.getBindingName()), any(ProductEvent.class));
     }
 
     @Test
@@ -437,7 +438,7 @@ class ProductServiceTest {
 
         when(objectMapper.writeValueAsString(null)).thenReturn("[]");
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(productWithNullTags));
-        doNothing().when(rabbitTemplate).convertAndSend(anyString(), (Object) any(ProductEvent.class));
+        when(streamBridge.send(anyString(), any(ProductEvent.class))).thenReturn(true);
         when(objectMapper.readValue("[]", String[].class)).thenReturn(new String[0]);
 
         StepVerifier.create(productService.createProduct(createDTO))
@@ -445,6 +446,6 @@ class ProductServiceTest {
                 .verifyComplete();
 
         verify(productRepository).save(any(Product.class));
-        verify(rabbitTemplate).convertAndSend(eq("product.events"), (Object) any(ProductEvent.class));
+        verify(streamBridge).send(eq(ProductBindings.PRODUCT_EVENTS_OUTPUT.getBindingName()), any(ProductEvent.class));
     }
 }

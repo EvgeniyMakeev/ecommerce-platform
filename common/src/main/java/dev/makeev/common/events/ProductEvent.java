@@ -1,5 +1,6 @@
 package dev.makeev.common.events;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 public record ProductEvent(
@@ -7,10 +8,5 @@ public record ProductEvent(
         String productId,
         EventType eventType,
         String payload,
-        Instant timestamp) {
-    public enum EventType {
-        CREATED,
-        UPDATED,
-        DELETED
-    }
+        Instant timestamp) implements Serializable {
 }

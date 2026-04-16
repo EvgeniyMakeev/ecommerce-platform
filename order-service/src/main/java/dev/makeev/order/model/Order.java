@@ -35,9 +35,7 @@ public class Order {
     private String billingAddress;
 
     private List<OrderItem> items;
-
     private Instant createdAt;
-
     private Instant updatedAt;
 
     private String sagaId;
@@ -61,11 +59,6 @@ public class Order {
 
     public void updateStatus(OrderStatus newStatus) {
         this.status = newStatus.name();
-        this.updatedAt = Instant.now();
-    }
-
-    public void updateTotalAmount() {
-        this.totalAmount = calculateTotal(items);
         this.updatedAt = Instant.now();
     }
 

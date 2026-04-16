@@ -21,6 +21,17 @@ spring:
     port: ${SPRING_RABBITMQ_PORT:5672}
     username: ${SPRING_RABBITMQ_USERNAME:ecommerce}
     password: ${SPRING_RABBITMQ_PASSWORD:ecommerce123}
+  cloud:
+    stream:
+      bindings:
+        productEvents-out-0:
+          destination: product.events
+          content-type: application/json
+      rabbit:
+        bindings:
+          productEvents-out-0:
+            producer:
+              confirm-mode: correlated
 
 management:
   endpoints:

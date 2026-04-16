@@ -6,9 +6,9 @@ spring:
     name: recommendation-service
   
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/ecommerce_recommendations
-    username: postgres
-    password: postgres
+    url: r2dbc:postgresql://localhost:5435/product_db
+    username: ecommerce
+    password: ecommerce123
   
   flyway:
     enabled: true

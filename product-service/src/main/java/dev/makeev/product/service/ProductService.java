@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.makeev.common.dto.ProductDTO;
 import dev.makeev.common.events.ProductEvent;
+import dev.makeev.common.events.EventType;
 import dev.makeev.product.model.Product;
 import dev.makeev.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import dev.makeev.common.config.ProductBindings;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,7 +27,7 @@ import java.util.UUID;
 public class ProductService implements ProductServiceInterface {
 
     private final ProductRepository productRepository;
-    private final RabbitTemplate rabbitTemplate;
+    private final StreamBridge streamBridge;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -33,9 +35,8 @@ public class ProductService implements ProductServiceInterface {
         log.info("Creating product: {}", productDTO.name());
 
         return Mono.fromCallable(() -> Product.builder()
-                .id(UUID.randomUUID().toString())
                 .name(productDTO.name())
-                .description(productDTO.description())
+                .name(productDTO.name())
                 .price(productDTO.price())
                 .category(productDTO.category())
                 .tags(serializeTags(productDTO.tags()))
@@ -45,7 +46,7 @@ public class ProductService implements ProductServiceInterface {
                 .build())
                 .flatMap(productRepository::save)
                 .flatMap(product -> {
-                    publishProductEvent(product, ProductEvent.EventType.CREATED);
+                    publishProductEvent(product, EventType.CREATED);
                     return Mono.just(toDTO(product));
                 })
                 .doOnSuccess(dto -> log.info("Product created with ID: {}", dto.id()))
@@ -75,7 +76,7 @@ public class ProductService implements ProductServiceInterface {
                     return productRepository.save(existing);
                 })
                 .flatMap(product -> {
-                    publishProductEvent(product, ProductEvent.EventType.UPDATED);
+                    publishProductEvent(product, EventType.UPDATED);
                     return Mono.just(toDTO(product));
                 })
                 .doOnSuccess(dto -> log.info("Product updated: {}", id))
@@ -89,7 +90,7 @@ public class ProductService implements ProductServiceInterface {
         return productRepository.findById(id)
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not found: " + id)))
                 .flatMap(product -> {
-                    publishProductEvent(product, ProductEvent.EventType.DELETED);
+                    publishProductEvent(product, EventType.DELETED);
                     return productRepository.deleteById(id);
                 })
                 .doOnSuccess(v -> log.info("Product deleted: {}", id))
@@ -129,7 +130,7 @@ public class ProductService implements ProductServiceInterface {
                 .map(this::toDTO);
     }
 
-    private void publishProductEvent(Product product, ProductEvent.EventType eventType) {
+    private void publishProductEvent(Product product, EventType eventType) {
         try {
             var productDTO = toDTO(product);
             var payload = objectMapper.writeValueAsString(productDTO);
@@ -140,7 +141,7 @@ public class ProductService implements ProductServiceInterface {
                     payload,
                     Instant.now());
 
-            rabbitTemplate.convertAndSend("product.events", event);
+            streamBridge.send(ProductBindings.PRODUCT_EVENTS_OUTPUT.getBindingName(), event);
 
             log.info("Published {} event for product: {}", eventType, product.getId());
         } catch (JsonProcessingException e) {

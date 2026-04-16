@@ -18,6 +18,23 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:ecommerce}
+    password: ${SPRING_RABBITMQ_PASSWORD:ecommerce123}
+  cloud:
+    stream:
+      bindings:
+        productEvents-in-0:
+          destination: product.events
+          group: inventory-service
+          content-type: application/json
+      rabbit:
+        bindings:
+          productEvents-in-0:
+            consumer:
+              auto-bind-dlq: true
 
 management:
   endpoints:

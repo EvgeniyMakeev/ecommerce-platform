@@ -7,7 +7,7 @@ spring:
   
   # Elasticsearch Configuration
   elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://localhost:9200}
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://elasticsearch:9200}
     
   # RabbitMQ Configuration for Spring Cloud Stream
   rabbitmq:
@@ -25,18 +25,11 @@ spring:
           destination: product.events
           group: search-service
           content-type: application/json
-        productEvents-out-0:
-          destination: search.events
-          content-type: application/json
       rabbit:
         bindings:
           productEvents-in-0:
             consumer:
               auto-bind-dlq: true
-              acknowledge-mode: manual
-          productEvents-out-0:
-            producer:
-              confirm-mode: correlated
 
 management:
   endpoints:
