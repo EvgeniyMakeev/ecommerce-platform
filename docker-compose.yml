@@ -196,10 +196,16 @@ services:
     depends_on:
       postgres-inventory:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres-inventory:5432/inventory_db
       SPRING_R2DBC_USERNAME: ecommerce
       SPRING_R2DBC_PASSWORD: ecommerce123
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ecommerce
+      SPRING_RABBITMQ_PASSWORD: ecommerce123
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
       interval: 30s
