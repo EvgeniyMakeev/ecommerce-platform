@@ -75,13 +75,15 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,gateway
   endpoint:
     health:
       show-details: always
-  info:
-    env:
-      enabled: true
+  health:
+    discovery:
+      enabled: false
+    reactive-discovery:
+      enabled: false
 
 # SpringDoc OpenAPI (Swagger) Configuration
 springdoc:
