@@ -15,14 +15,12 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-# Logging Configuration
 logging:
   level:
     dev.makeev.recommendation: DEBUG
     org.springframework.r2dbc: INFO
     io.r2dbc.postgresql: INFO
 
-# Management endpoints for health checks
 management:
   endpoints:
     web:

@@ -25,14 +25,18 @@ public class CartService {
 
     public Mono<Cart> addItemToCart(String userId, CartItem item) {
         log.info("Adding item to cart for user {}: productId {}", userId, item.getProductId());
-        
-        return getCartByUserId(userId)
+
+        return cartRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.info("Creating new cart for user: {}", userId);
+                    return Mono.just(new Cart(userId));
+                }))
                 .flatMap(cart -> {
                     cart.addItem(item);
                     return cartRepository.save(cart);
                 })
                 .doOnSuccess(cart -> log.info("Added item to cart: {} for user: {}", item.getProductId(), userId))
-                .doOnError(error -> log.error("Error adding item to cart for user {}: {}", userId, error));
+                .doOnError(error -> log.error("Error adding item to cart for user {}: {}", userId, error.toString()));
     }
 
     public Mono<Cart> removeItemFromCart(String userId, String productId) {
@@ -44,7 +48,7 @@ public class CartService {
                     return cartRepository.save(cart);
                 })
                 .doOnSuccess(cart -> log.info("Removed item from cart: {} for user: {}", productId, userId))
-                .doOnError(error -> log.error("Error removing item from cart for user {}: {}", userId, error));
+                .doOnError(error -> log.error("Error removing item from cart for user {}: {}", userId, error.toString()));
     }
 
     public Mono<Cart> updateItemInCart(String userId, String productId, CartItem item) {
@@ -56,7 +60,7 @@ public class CartService {
                     return cartRepository.save(cart);
                 })
                 .doOnSuccess(cart -> log.info("Updated item in cart: {} for user: {}", productId, userId))
-                .doOnError(error -> log.error("Error updating item in cart for user {}: {}", userId, error));
+                .doOnError(error -> log.error("Error updating item in cart for user {}: {}", userId, error.toString()));
     }
 
     public Mono<Cart> clearCart(String userId) {
@@ -68,11 +72,7 @@ public class CartService {
                     return cartRepository.save(cart);
                 })
                 .doOnSuccess(cart -> log.info("Cleared cart for user: {}", userId))
-                .doOnError(error -> log.error("Error clearing cart for user {}: {}", userId, error));
-    }
-
-    public Mono<Cart> getCartWithItems(String userId) {
-        return getCartByUserId(userId);
+                .doOnError(error -> log.error("Error clearing cart for user {}: {}", userId, error.toString()));
     }
 
     public Mono<Void> deleteCart(String userId) {
@@ -80,7 +80,7 @@ public class CartService {
         
         return cartRepository.deleteByUserId(userId)
                 .doOnSuccess(v -> log.info("Deleted cart for user: {}", userId))
-                .doOnError(error -> log.error("Error deleting cart for user {}: {}", userId, error));
+                .doOnError(error -> log.error("Error deleting cart for user {}: {}", userId, error.toString()));
     }
 
     public Mono<Cart> addProductToCart(String userId, ProductDTO product, int quantity) {

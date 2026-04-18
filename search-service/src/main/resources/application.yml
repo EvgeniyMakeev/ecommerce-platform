@@ -5,11 +5,9 @@ spring:
   application:
     name: search-service
   
-  # Elasticsearch Configuration
   elasticsearch:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://elasticsearch:9200}
     
-  # RabbitMQ Configuration for Spring Cloud Stream
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST:localhost}
     port: ${SPRING_RABBITMQ_PORT:5672}
@@ -17,7 +15,6 @@ spring:
     password: ${SPRING_RABBITMQ_PASSWORD:ecommerce123}
     virtual-host: /
     
-  # Spring Cloud Stream Configuration
   cloud:
     stream:
       bindings:
