@@ -1,6 +1,7 @@
 package dev.makeev.search.repository;
 
 import dev.makeev.search.model.ProductDocument;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.query.Criteria;
@@ -12,13 +13,10 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 
 @Repository
+@RequiredArgsConstructor
 public class ElasticsearchSearchRepositoryImpl {
 
     private final ReactiveElasticsearchOperations elasticsearchOperations;
-
-    public ElasticsearchSearchRepositoryImpl(ReactiveElasticsearchOperations elasticsearchOperations) {
-        this.elasticsearchOperations = elasticsearchOperations;
-    }
 
     public Flux<ProductDocument> findByNameContainingIgnoreCaseOrderByCreatedAtDesc(String name) {
         CriteriaQuery query = new CriteriaQuery(

@@ -6,15 +6,11 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Repository
 public interface PopularProductRepository extends R2dbcRepository<PopularProduct, Long> {
     
     Mono<PopularProduct> findByProductId(String productId);
-    
-    Flux<PopularProduct> findByCategory(String category);
-    
+
     Flux<PopularProduct> findTop10ByOrderByPopularityScoreDesc();
     
     Flux<PopularProduct> findTop5ByCategoryOrderByPopularityScoreDesc(String category);
@@ -28,8 +24,6 @@ public interface PopularProductRepository extends R2dbcRepository<PopularProduct
     Flux<PopularProduct> findByRatingGreaterThanOrderByRatingDesc(Double minRating);
     
     Flux<PopularProduct> findAllByOrderByPopularityScoreDesc();
-    
-    Flux<PopularProduct> findByProductIdIn(List<String> productIds);
-    
+
     Mono<Void> deleteByProductId(String productId);
 }

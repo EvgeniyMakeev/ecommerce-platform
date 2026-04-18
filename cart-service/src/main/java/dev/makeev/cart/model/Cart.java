@@ -3,6 +3,7 @@ package dev.makeev.cart.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
@@ -26,8 +27,10 @@ public class Cart {
 
     private BigDecimal totalAmount;
 
+    @Transient
     private Instant createdAt;
 
+    @Transient
     private Instant updatedAt;
 
     public Cart(String userId) {

@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: api-gateway
-  
+
   # Redis for Rate Limiting
   data:
     redis:
@@ -24,36 +24,117 @@ spring:
           uri: http://product-service:8081
           predicates:
             - Path=/api/products/**,/api/categories/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: productCircuitBreaker
+                fallbackUri: forward:/fallback/product
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+                methods: GET,POST,PUT,DELETE
 
         # Search Service Routes
         - id: search-service
           uri: http://search-service:8082
           predicates:
             - Path=/api/search/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: searchCircuitBreaker
+                fallbackUri: forward:/fallback/search
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
 
         # Cart Service Routes
         - id: cart-service
           uri: http://cart-service:8083
           predicates:
             - Path=/api/cart/**,/api/carts/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: cartCircuitBreaker
+                fallbackUri: forward:/fallback/cart
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
 
         # Inventory Service Routes
         - id: inventory-service
           uri: http://inventory-service:8084
           predicates:
             - Path=/api/inventory/**,/api/inventories/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: inventoryCircuitBreaker
+                fallbackUri: forward:/fallback/inventory
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
 
         # Order Service Routes
         - id: order-service
           uri: http://order-service:8085
           predicates:
             - Path=/api/orders/**,/api/order/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderCircuitBreaker
+                fallbackUri: forward:/fallback/order
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
 
         # Recommendation Service Routes
         - id: recommendation-service
           uri: http://recommendation-service:8086
           predicates:
             - Path=/api/recommendations/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: recommendationCircuitBreaker
+                fallbackUri: forward:/fallback/recommendation
+            - name: Retry
+              args:
+                retries: 2
+                statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+
+        # OpenAPI Documentation Routes for Swagger Aggregation
+        - id: product-service-openapi
+          uri: http://product-service:8081
+          predicates:
+            - Path=/v3/api-docs/product-service
+        - id: search-service-openapi
+          uri: http://search-service:8082
+          predicates:
+            - Path=/v3/api-docs/search-service
+        - id: cart-service-openapi
+          uri: http://cart-service:8083
+          predicates:
+            - Path=/v3/api-docs/cart-service
+        - id: inventory-service-openapi
+          uri: http://inventory-service:8084
+          predicates:
+            - Path=/v3/api-docs/inventory-service
+        - id: order-service-openapi
+          uri: http://order-service:8085
+          predicates:
+            - Path=/v3/api-docs/order-service
+        - id: recommendation-service-openapi
+          uri: http://recommendation-service:8086
+          predicates:
+            - Path=/v3/api-docs/recommendation-service
 
       # Global CORS configuration
       globalcors:
@@ -64,18 +145,55 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
 
+    # Circuit Breaker Configuration
+    circuitbreaker:
+      resilience4j:
+        instances:
+          productCircuitBreaker:
+            failureRateThreshold: 50
+            waitDurationInOpenState: 30s
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+          searchCircuitBreaker:
+            failureRateThreshold: 60
+            waitDurationInOpenState: 20s
+            slidingWindowSize: 8
+            minimumNumberOfCalls: 4
+          cartCircuitBreaker:
+            failureRateThreshold: 40
+            waitDurationInOpenState: 25s
+            slidingWindowSize: 12
+            minimumNumberOfCalls: 6
+          inventoryCircuitBreaker:
+            failureRateThreshold: 50
+            waitDurationInOpenState: 30s
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+          orderCircuitBreaker:
+            failureRateThreshold: 30
+            waitDurationInOpenState: 35s
+            slidingWindowSize: 15
+            minimumNumberOfCalls: 8
+          recommendationCircuitBreaker:
+            failureRateThreshold: 50
+            waitDurationInOpenState: 30s
+            slidingWindowSize: 10
+            minimumNumberOfCalls: 5
+
 # Logging Configuration
 logging:
   level:
     dev.makeev.gateway: DEBUG
-    org.springframework.cloud.gateway: INFO
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    reactor.netty: DEBUG
 
 # Management Endpoints
 management:
   endpoints:
     web:
       exposure:
-        include: health,gateway
+        include: health,info,gateway,circuitbreakers
   endpoint:
     health:
       show-details: always
@@ -84,6 +202,9 @@ management:
       enabled: false
     reactive-discovery:
       enabled: false
+  info:
+    env:
+      enabled: true
 
 # SpringDoc OpenAPI (Swagger) Configuration
 springdoc:

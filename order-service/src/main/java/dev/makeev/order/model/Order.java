@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
@@ -20,28 +22,45 @@ public class Order {
     @Id
     private Long id;
 
+    @Column("order_number")
     private String orderNumber;
 
+    @Column("user_id")
     private String userId;
-
     private String status;
 
+    @Column("total_amount")
     private BigDecimal totalAmount;
-
     private String currency;
 
+    @Column("shipping_address")
     private String shippingAddress;
 
+    @Column("billing_address")
     private String billingAddress;
 
+    @Transient
     private List<OrderItem> items;
+
+    @Column("created_at")
     private Instant createdAt;
+
+    @Column("updated_at")
     private Instant updatedAt;
 
+    @Column("saga_id")
     private String sagaId;
+
+    @Column("compensation_data")
     private String compensationData;
+
+    @Column("failure_reason")
     private String failureReason;
+
+    @Column("saga_started_at")
     private Instant sagaStartedAt;
+
+    @Column("saga_completed_at")
     private Instant sagaCompletedAt;
 
     public Order(String userId, List<OrderItem> items, String shippingAddress, String billingAddress) {
