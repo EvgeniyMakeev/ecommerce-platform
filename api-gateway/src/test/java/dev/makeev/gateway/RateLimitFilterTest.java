@@ -2,6 +2,9 @@ package dev.makeev.gateway;
 
 import dev.makeev.gateway.filter.SimpleRateLimitFilter;
 import dev.makeev.gateway.filter.SimpleRateLimitFilterConfig;
+import dev.makeev.gateway.service.CircuitBreakerStateService;
+import dev.makeev.gateway.service.RateLimitService;
+import org.springframework.cloud.gateway.route.RouteLocator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +37,16 @@ class RateLimitFilterTest {
 
     @MockBean
     private GatewayFilterChain filterChain;
-    
+
+    @MockBean
+    private CircuitBreakerStateService circuitBreakerStateService;
+
+    @MockBean
+    private RouteLocator routeLocator;
+
+    @MockBean
+    private RateLimitService rateLimitService;
+
     @MockBean
     private ReactiveRedisTemplate<String, String> redisTemplate;
     

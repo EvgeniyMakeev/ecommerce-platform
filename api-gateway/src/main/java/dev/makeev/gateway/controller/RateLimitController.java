@@ -1,5 +1,6 @@
 package dev.makeev.gateway.controller;
 
+import dev.makeev.gateway.service.RateLimitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,27 +21,33 @@ import java.util.Map;
 @Slf4j
 public class RateLimitController {
 
+    private final RateLimitService rateLimitService;
+
     @GetMapping("/status")
     public Mono<ResponseEntity<Map<String, Object>>> getRateLimitStatus() {
         log.info("GET /api/admin/rate-limit/status - Getting rate limit status");
         
-        Map<String, Object> status = new HashMap<>();
-        status.put("status", "active");
-        status.put("type", "redis-based");
-        status.put("configurations", Map.of(
-            "search-service", "100 requests per minute",
-            "cart-service", "100 requests per minute",
-            "inventory-service", "100 requests per minute",
-            "order-service", "20 requests per minute (strict)",
-            "recommendation-service", "1000 requests per minute (permissive)"
-        ));
-        status.put("keyTypes", Map.of(
-            "ip", "Based on client IP address",
-            "user", "Based on X-User-ID header",
-            "session", "Based on X-Session-ID header"
-        ));
+        return rateLimitService.getRateLimitStatus()
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/details")
+    public Mono<ResponseEntity<Map<String, Object>>> getRateLimitDetails(
+            @RequestParam String key,
+            @RequestParam(defaultValue = "ip") String keyType) {
+        log.info("GET /api/admin/rate-limit/details - Getting rate limit details for key: {} ({})", key, keyType);
         
-        return Mono.just(ResponseEntity.ok(status));
+        String fullKey = keyType + ":" + key;
+        return rateLimitService.getRateLimitDetails(fullKey)
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/all")
+    public Mono<ResponseEntity<Map<String, Object>>> getAllRateLimitDetails() {
+        log.info("GET /api/admin/rate-limit/all - Getting all rate limit details");
+        
+        return rateLimitService.getAllRateLimitDetails()
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping("/headers")
@@ -73,14 +80,17 @@ public class RateLimitController {
         String keyType = request.getOrDefault("keyType", "ip");
         String key = request.get("key");
         
+        if (key == null || key.isEmpty()) {
+            log.warn("POST /api/admin/rate-limit/reset - Missing key parameter");
+            Map<String, String> error = new HashMap<>();
+            error.put("status", "error");
+            error.put("message", "Key parameter is required");
+            return Mono.just(ResponseEntity.badRequest().body(error));
+        }
+        
         log.info("POST /api/admin/rate-limit/reset - Resetting rate limit for key: {} ({})", key, keyType);
         
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "reset_requested");
-        response.put("key", key);
-        response.put("keyType", keyType);
-        response.put("message", "Rate limit reset requested (cache clearing not implemented)");
-        
-        return Mono.just(ResponseEntity.ok(response));
+        return rateLimitService.resetRateLimit(key, keyType)
+                .map(ResponseEntity::ok);
     }
 }
