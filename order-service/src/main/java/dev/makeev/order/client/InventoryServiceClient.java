@@ -76,15 +76,7 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class)
                 .doOnSuccess(v -> log.debug("Cancelled reservation of {} units of product {} for order {}", 
                         quantity, productId, orderId))
-                .doOnError(error -> log.error("Failed to cancel reservation of {} units of product {} for order {}: {}", 
+                .doOnError(error -> log.error("Failed to cancel reservation of {} units of product {} for order {}: {}",
                         quantity, productId, orderId, error.getMessage()));
     }
-
-    public record InventoryResponse(boolean success, String message) {}
-
-    public record ReserveRequest(String productId, int quantity, String orderId) {}
-
-    public record ConfirmReservationRequest(String productId, int quantity, String orderId) {}
-
-    public record CancelReservationRequest(String productId, int quantity, String orderId) {}
 }

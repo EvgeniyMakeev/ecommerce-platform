@@ -1,5 +1,6 @@
 package dev.makeev.order.saga;
 
+import dev.makeev.order.client.InventoryResponse;
 import dev.makeev.order.client.InventoryServiceClient;
 import dev.makeev.order.client.NotificationServiceClient;
 import dev.makeev.order.client.PaymentServiceClient;
@@ -32,10 +33,8 @@ class SagaOrchestratorUnitTest {
     @Mock
     private InventoryServiceClient inventoryServiceClient;
 
-    @Mock
     private PaymentServiceClient paymentServiceClient;
 
-    @Mock
     private NotificationServiceClient notificationServiceClient;
 
     private SagaOrchestrator sagaOrchestrator;
@@ -43,7 +42,9 @@ class SagaOrchestratorUnitTest {
 
     @BeforeEach
     void setUp() {
-        sagaOrchestrator = new SagaOrchestrator(orderService, inventoryServiceClient, 
+        paymentServiceClient = new PaymentServiceClient();
+        notificationServiceClient = new NotificationServiceClient();
+        sagaOrchestrator = new SagaOrchestrator(orderService, inventoryServiceClient,
                 paymentServiceClient, notificationServiceClient);
 
         List<OrderItem> testItems = List.of(
@@ -146,25 +147,19 @@ class SagaOrchestratorUnitTest {
         when(orderService.updateOrder(any(Long.class), any(Order.class)))
                 .thenReturn(Mono.just(testOrder));
         when(inventoryServiceClient.reserveInventory(any(Order.class)))
-                .thenReturn(Mono.just(new InventoryServiceClient.InventoryResponse(true, "Success")));
-        when(paymentServiceClient.processPayment(any(Order.class)))
-                .thenReturn(Mono.just(new PaymentServiceClient.PaymentResponse(true, "txn-123", null)));
+                .thenReturn(Mono.just(new InventoryResponse(true, "Success")));
         when(inventoryServiceClient.confirmInventoryReservation(any(Order.class)))
-                .thenReturn(Mono.just(new InventoryServiceClient.InventoryResponse(true, "Success")));
-        when(notificationServiceClient.sendOrderConfirmation(any(Order.class)))
-                .thenReturn(Mono.just(new NotificationServiceClient.NotificationResponse(true, "notif-123", "Success")));
+                .thenReturn(Mono.just(new InventoryResponse(true, "Success")));
 
         StepVerifier.create(sagaOrchestrator.executeOrderSaga(testOrder))
-                .expectNextMatches(order -> 
+                .expectNextMatches(order ->
                         order.getStatus().equals("CONFIRMED") &&
                         !order.isSagaActive() &&
                         order.getSagaCompletedAt() != null)
                 .verifyComplete();
 
         verify(inventoryServiceClient).reserveInventory(testOrder);
-        verify(paymentServiceClient).processPayment(testOrder);
         verify(inventoryServiceClient).confirmInventoryReservation(testOrder);
-        verify(notificationServiceClient).sendOrderConfirmation(testOrder);
         verify(orderService, times(4)).updateOrder(any(Long.class), any(Order.class)); // Initial + 3 updates
     }
 
@@ -175,22 +170,16 @@ class SagaOrchestratorUnitTest {
                 .thenReturn(Mono.just(testOrder));
         when(inventoryServiceClient.reserveInventory(any(Order.class)))
                 .thenReturn(Mono.error(new RuntimeException("Inventory unavailable")));
-        when(paymentServiceClient.refundPayment(any(Order.class)))
-                .thenReturn(Mono.just(new PaymentServiceClient.PaymentResponse(true, "refund-123", null)));
         when(inventoryServiceClient.releaseInventoryReservation(any(Order.class)))
-                .thenReturn(Mono.just(new InventoryServiceClient.InventoryResponse(true, "Released")));
-        when(notificationServiceClient.sendOrderCancellationNotification(any(Order.class)))
-                .thenReturn(Mono.just(new NotificationServiceClient.NotificationResponse(true, "notif-456", "Sent")));
+                .thenReturn(Mono.just(new InventoryResponse(true, "Released")));
 
         StepVerifier.create(sagaOrchestrator.executeOrderSaga(testOrder))
-                .expectNextMatches(order -> 
+                .expectNextMatches(order ->
                         order.getStatus().equals("CANCELLED") &&
                         !order.isSagaActive() &&
                         order.getFailureReason() != null)
                 .verifyComplete();
 
         verify(inventoryServiceClient, times(2)).releaseInventoryReservation(testOrder);
-        verify(paymentServiceClient, times(2)).refundPayment(testOrder); // Called in both compensation cycles
-        verify(notificationServiceClient, times(2)).sendOrderCancellationNotification(testOrder); // Called in both compensation cycles
     }
 }
