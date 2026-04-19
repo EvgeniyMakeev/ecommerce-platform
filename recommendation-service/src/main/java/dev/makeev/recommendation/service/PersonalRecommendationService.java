@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,19 +48,19 @@ public class PersonalRecommendationService {
         
         return userActivityRepository.findByUserIdAndActivityTypeOrderByCreatedAtDesc(
                 userId, ActivityType.PURCHASE)
-                .take(20) // Get recent purchases
+                .take(20)
                 .flatMap(activity -> 
                         userActivityRepository.findByProductId(activity.getProductId())
                                 .filter(otherActivity -> !otherActivity.getUserId().equals(userId))
                                 .map(UserActivity::getUserId)
                                 .distinct()
-                                .take(10) // Similar users
+                                .take(10)
                 )
                 .distinct()
                 .flatMap(similarUserId -> 
                         userActivityRepository.findByUserIdAndActivityTypeOrderByCreatedAtDesc(
                                 similarUserId, ActivityType.PURCHASE)
-                                .take(10) // Their purchases
+                                .take(10)
                                 .filter(activity -> !userAlreadyPurchased(userId, activity.getProductId()))
                 )
                 .map(activity -> UserRecommendation.builder()
@@ -70,9 +69,9 @@ public class PersonalRecommendationService {
                         .productName(activity.getProductName())
                         .category(activity.getCategory())
                         .price(activity.getPrice())
-                        .imageUrl(null) // imageUrl would be fetched from product service
+                        .imageUrl(null)
                         .recommendationType(RecommendationType.COLLABORATIVE_FILTERING)
-                        .recommendationScore(calculateCollaborativeScore(userId, activity.getProductId()))
+                        .recommendationScore(calculateCollaborativeScore(activity.getProductId()))
                         .reason("Users who bought this also liked")
                         .createdAt(LocalDateTime.now())
                         .expiresAt(LocalDateTime.now().plusDays(7))
@@ -89,24 +88,32 @@ public class PersonalRecommendationService {
                         ActivityType.PURCHASE,
                         ActivityType.ADD_TO_CART
                 ))
-                .take(50) // Recent activity
+                .take(50)
                 .collectList()
                 .flatMapMany(activities -> {
                     Map<String, Integer> categoryPreferences = new HashMap<>();
                     Map<String, Double> pricePreferences = new HashMap<>();
+                    Map<String, Integer> categoryCounts = new HashMap<>();
                     
                     activities.forEach(activity -> {
                         categoryPreferences.merge(activity.getCategory(), 1, Integer::sum);
                         if (activity.getPrice() != null) {
                             pricePreferences.merge(activity.getCategory(), activity.getPrice(), Double::sum);
+                            categoryCounts.merge(activity.getCategory(), 1, Integer::sum);
                         }
+                    });
+                    
+                    Map<String, Double> avgPriceByCategory = new HashMap<>();
+                    pricePreferences.forEach((category, totalPrice) -> {
+                        int count = categoryCounts.getOrDefault(category, 1);
+                        avgPriceByCategory.put(category, totalPrice / count);
                     });
                     
                     List<String> preferredCategories = categoryPreferences.entrySet().stream()
                             .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
                             .limit(3)
                             .map(Map.Entry::getKey)
-                            .collect(Collectors.toList());
+                            .toList();
                     
                     return Flux.fromIterable(preferredCategories)
                             .flatMap(category -> 
@@ -116,6 +123,12 @@ public class PersonalRecommendationService {
                             .filter(product -> !userAlreadyInteracted(userId, product.getProductId()))
                             .map(product -> {
                                 double score = categoryPreferences.getOrDefault(product.getCategory(), 0) * 0.1;
+                                Double avgPrice = avgPriceByCategory.get(product.getCategory());
+                                if (avgPrice != null && product.getPrice() != null) {
+                                    double priceRatio = product.getPrice().doubleValue() / avgPrice;
+                                    double priceScore = 1.0 / (1.0 + Math.abs(priceRatio - 1.0));
+                                    score += priceScore * 0.5;
+                                }
                                 return UserRecommendation.builder()
                                         .userId(userId)
                                         .productId(product.getProductId())
@@ -139,7 +152,7 @@ public class PersonalRecommendationService {
         
         return userActivityRepository.findByUserIdAndActivityTypeOrderByCreatedAtDesc(
                 userId, ActivityType.VIEW)
-                .take(30) // Recent views
+                .take(30)
                 .groupBy(UserActivity::getCategory)
                 .flatMap(group -> 
                         group.key().equals("uncategorized") ? 
@@ -147,7 +160,7 @@ public class PersonalRecommendationService {
                                 group.count().map(count -> Map.entry(group.key(), count))
                 )
                 .sort(Map.Entry.<String, Long>comparingByValue().reversed())
-                .take(3) // Top 3 categories
+                .take(3)
                 .flatMap(entry -> 
                         popularProductService.getTopPopularProductsByCategory(entry.getKey())
                                 .take(limit / 3)
@@ -174,14 +187,14 @@ public class PersonalRecommendationService {
         
         return userActivityRepository.findByUserIdAndActivityTypeOrderByCreatedAtDesc(
                 userId, ActivityType.PURCHASE)
-                .take(10) // Recent purchases
+                .take(10)
                 .flatMap(purchase -> 
                         userActivityRepository.findByProductId(purchase.getProductId())
                                 .filter(activity -> activity.getActivityType() == ActivityType.PURCHASE)
                                 .filter(activity -> !activity.getUserId().equals(userId))
                                 .map(UserActivity::getProductId)
                                 .distinct()
-                                .take(5) // Frequently bought together
+                                .take(5)
                 )
                 .distinct()
                 .flatMap(relatedProductId -> 
@@ -225,8 +238,7 @@ public class PersonalRecommendationService {
                 .doOnSuccess(savedActivity -> {
                     log.debug("Successfully tracked activity: {} for user: {}", 
                             savedActivity.getActivityType(), savedActivity.getUserId());
-                    
-                    // Trigger recommendation refresh for certain activities
+
                     if (activityType == ActivityType.PURCHASE || 
                         activityType == ActivityType.ADD_TO_CART) {
                         refreshRecommendations(userId);
@@ -320,20 +332,23 @@ public class PersonalRecommendationService {
     private boolean userAlreadyPurchased(String userId, String productId) {
         return userActivityRepository.findByUserIdAndActivityType(userId, ActivityType.PURCHASE)
                 .any(activity -> activity.getProductId().equals(productId))
-                .block();
+                .blockOptional()
+                .orElse(false);
     }
     
     private boolean userAlreadyInteracted(String userId, String productId) {
         return userActivityRepository.findByUserId(userId)
                 .any(activity -> activity.getProductId().equals(productId))
-                .block();
+                .blockOptional()
+                .orElse(false);
     }
     
-    private double calculateCollaborativeScore(String userId, String productId) {
+    private double calculateCollaborativeScore(String productId) {
         return userActivityRepository.findByProductId(productId)
                 .count()
                 .map(count -> Math.log1p(count) * 0.5)
-                .block();
+                .blockOptional()
+                .orElse(0.0);
     }
     
     private void refreshRecommendations(String userId) {
