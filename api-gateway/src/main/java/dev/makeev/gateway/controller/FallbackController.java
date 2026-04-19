@@ -1,5 +1,7 @@
 package dev.makeev.gateway.controller;
 
+import dev.makeev.gateway.service.CircuitBreakerStateService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,89 +18,87 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/fallback")
+@RequiredArgsConstructor
 public class FallbackController {
+
+    private final CircuitBreakerStateService circuitBreakerStateService;
 
     @GetMapping("/product")
     public Mono<ResponseEntity<Map<String, Object>>> productFallback() {
         log.warn("Product service fallback activated");
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "product-service");
-        response.put("status", "unavailable");
-        response.put("message", "Product service is currently unavailable. Please try again later.");
-        response.put("timestamp", Instant.now());
-        response.put("fallback", true);
-        
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        return circuitBreakerStateService.getCircuitBreakerState("productCircuitBreaker")
+                .map(state -> buildFallbackResponse("product-service", state));
     }
 
     @GetMapping("/search")
     public Mono<ResponseEntity<Map<String, Object>>> searchFallback() {
         log.warn("Search service fallback activated");
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "search-service");
-        response.put("status", "unavailable");
-        response.put("message", "Search service is currently unavailable. Please try again later.");
-        response.put("timestamp", Instant.now());
-        response.put("fallback", true);
-        
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        return circuitBreakerStateService.getCircuitBreakerState("searchCircuitBreaker")
+                .map(state -> buildFallbackResponse("search-service", state));
     }
 
     @GetMapping("/cart")
     public Mono<ResponseEntity<Map<String, Object>>> cartFallback() {
         log.warn("Cart service fallback activated");
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "cart-service");
-        response.put("status", "unavailable");
-        response.put("message", "Cart service is currently unavailable. Please try again later.");
-        response.put("timestamp", Instant.now());
-        response.put("fallback", true);
-        
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        return circuitBreakerStateService.getCircuitBreakerState("cartCircuitBreaker")
+                .map(state -> buildFallbackResponse("cart-service", state));
     }
 
     @GetMapping("/inventory")
     public Mono<ResponseEntity<Map<String, Object>>> inventoryFallback() {
         log.warn("Inventory service fallback activated");
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "inventory-service");
-        response.put("status", "unavailable");
-        response.put("message", "Inventory service is currently unavailable. Please try again later.");
-        response.put("timestamp", Instant.now());
-        response.put("fallback", true);
-        
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        return circuitBreakerStateService.getCircuitBreakerState("inventoryCircuitBreaker")
+                .map(state -> buildFallbackResponse("inventory-service", state));
     }
 
     @GetMapping("/order")
     public Mono<ResponseEntity<Map<String, Object>>> orderFallback() {
         log.warn("Order service fallback activated");
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("service", "order-service");
-        response.put("status", "unavailable");
-        response.put("message", "Order service is currently unavailable. Please try again later.");
-        response.put("timestamp", Instant.now());
-        response.put("fallback", true);
+        return circuitBreakerStateService.getCircuitBreakerState("orderCircuitBreaker")
+                .map(state -> buildFallbackResponse("order-service", state));
+    }
+
+    @GetMapping("/recommendation")
+    public Mono<ResponseEntity<Map<String, Object>>> recommendationFallback() {
+        log.warn("Recommendation service fallback activated");
         
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        return circuitBreakerStateService.getCircuitBreakerState("recommendationCircuitBreaker")
+                .map(state -> buildFallbackResponse("recommendation-service", state));
     }
 
     @GetMapping("/service/{serviceName}")
     public Mono<ResponseEntity<Map<String, Object>>> genericFallback(@PathVariable String serviceName) {
         log.warn("Generic fallback activated for service: {}", serviceName);
         
+        String circuitBreakerName = serviceName + "CircuitBreaker";
+        return circuitBreakerStateService.getCircuitBreakerState(circuitBreakerName)
+                .map(state -> buildFallbackResponse(serviceName, state))
+                .onErrorResume(throwable -> {
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("service", serviceName);
+                    response.put("status", "unavailable");
+                    response.put("message", String.format("Service %s is currently unavailable. Please try again later.", serviceName));
+                    response.put("timestamp", Instant.now());
+                    response.put("fallback", true);
+                    response.put("circuitBreaker", "unknown");
+                    return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+                });
+    }
+
+    private ResponseEntity<Map<String, Object>> buildFallbackResponse(String serviceName, Map<String, Object> circuitBreakerState) {
         Map<String, Object> response = new HashMap<>();
         response.put("service", serviceName);
         response.put("status", "unavailable");
-        response.put("message", String.format("Service %s is currently unavailable. Please try again later.", serviceName));
+        response.put("message", String.format("%s is currently unavailable due to circuit breaker being %s. Please try again later.", 
+                serviceName, circuitBreakerState.get("state").toString().toLowerCase()));
         response.put("timestamp", Instant.now());
         response.put("fallback", true);
-        
-        return Mono.just(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response));
+        response.put("circuitBreaker", circuitBreakerState);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 }
