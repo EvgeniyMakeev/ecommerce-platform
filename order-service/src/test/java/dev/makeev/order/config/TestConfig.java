@@ -1,6 +1,6 @@
 package dev.makeev.order.config;
 
-import dev.makeev.order.client.InventoryResponse;
+import dev.makeev.order.dto.InventoryResponse;
 import dev.makeev.order.client.InventoryServiceClient;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;

@@ -1,5 +1,6 @@
 package dev.makeev.order.client;
 
+import dev.makeev.order.dto.NotificationResponse;
 import dev.makeev.order.model.Order;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

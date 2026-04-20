@@ -1,6 +1,6 @@
 package dev.makeev.order.saga;
 
-import dev.makeev.order.client.InventoryResponse;
+import dev.makeev.order.dto.InventoryResponse;
 import dev.makeev.order.client.InventoryServiceClient;
 import dev.makeev.order.client.NotificationServiceClient;
 import dev.makeev.order.client.PaymentServiceClient;

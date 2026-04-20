@@ -1,5 +1,9 @@
 package dev.makeev.order.client;
 
+import dev.makeev.order.dto.CancelReservationRequest;
+import dev.makeev.order.dto.ConfirmReservationRequest;
+import dev.makeev.order.dto.InventoryResponse;
+import dev.makeev.order.dto.ReserveRequest;
 import dev.makeev.order.model.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
