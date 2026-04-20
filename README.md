@@ -1,78 +1,109 @@
 # E-commerce Platform
 
-Микросервисная платформа для интернет-магазина на Spring WebFlux с Elasticsearch, Redis и RabbitMQ.
+Микросервисная платформа для интернет-магазина на Spring WebFlux с реактивным программированием.
 
 ## Технологии
 
-- **Java 21**
-- **Spring Boot 3.2.1**
-- **Spring WebFlux** - реактивное программирование
-- **PostgreSQL** - основное хранилище
-- **Elasticsearch** - полнотекстовый поиск
-- **Redis** - кэширование и корзины
-- **RabbitMQ** - асинхронная коммуникация
+- **Java 21** - LTS версия с виртуальными потоками
+- **Spring Boot 3.2.1** - основной фреймворк
+- **Spring WebFlux** - реактивный веб-фреймворк
+- **Spring Data R2DBC** - реактивный доступ к PostgreSQL
+- **PostgreSQL** - основное хранилище (3 инстанса)
+- **Elasticsearch 8.11.0** - полнотекстовый поиск
+- **Redis 7** - кэширование и корзины
+- **RabbitMQ 3.12** - асинхронная коммуникация
 - **Spring Cloud Stream** - абстракция над messaging
+- **Flyway** - миграции базы данных
+- **Testcontainers** - интеграционное тестирование
 
-## Архитектура
+## Микросервисы
 
-### Планируемые микросервисы:
-- **API Gateway** (8080) - маршрутизация и rate limiting
-- **Product Service** (8081) - управление товарами
-- **Search Service** (8082) - поиск по Elasticsearch
-- **Order Service** (8083) - обработка заказов
-- **Cart Service** (8084) - корзина покупок
-- **Inventory Service** (8086) - управление остатками
-- **Recommendation Service** (8085) - рекомендации
+- **API Gateway** (8080) - маршрутизация, rate limiting, circuit breaker
+- **Product Service** (8081) - управление товарами, категории, теги
+- **Search Service** (8082) - полнотекстовый поиск по Elasticsearch
+- **Cart Service** (8083) - корзины покупок в Redis
+- **Inventory Service** (8084) - управление остатками и резервациями
+- **Order Service** (8085) - обработка заказов, saga pattern
+- **Recommendation Service** (8086) - рекомендательная система
 
 ## Быстрый старт
 
-### 1. Запуск инфраструктуры
-
+### С помощью Makefile
 ```bash
-# Запуск всех зависимостей
-docker-compose up -d
+# Запустить инфраструктуру
+make infra-up
 
-# Проверка статуса
-docker-compose ps
+# Собрать все модули
+make build
+
+# Запустить все сервисы
+make services-up
+
+# Запустить всё сразу
+make all-up
+
+# Остановить всё
+make all-down
+
+# Проверить статус сервисов
+make infra-status
+
+# Проверить здоровье всех сервисов
+make check-all
+```
+
+### С помощью Docker Compose
+```bash
+# Запустить инфраструктуру и сервисы
+docker compose up -d
+
+# Проверить статус
+docker compose ps
 
 # Просмотр логов
-docker-compose logs -f
+docker compose logs -f
 ```
 
-### 2. Проверка сервисов
+## Порты сервисов
 
-После запуска доступны:
-- **PostgreSQL (Product)**: localhost:5432
-- **PostgreSQL (Order)**: localhost:5433
-- **PostgreSQL (Inventory)**: localhost:5434
-- **Redis**: localhost:6379
-- **RabbitMQ AMQP**: localhost:5672
-- **RabbitMQ Management UI**: http://localhost:15672 (ecommerce/ecommerce123)
-- **Elasticsearch**: http://localhost:9200
-- **Kibana**: http://localhost:5601
+### Микросервисы
+- API Gateway: 8080
+- Product Service: 8081
+- Search Service: 8082
+- Cart Service: 8083
+- Inventory Service: 8084
+- Order Service: 8085
+- Recommendation Service: 8086
 
-### 3. Остановка
+### Инфраструктура
+- PostgreSQL (Product): 5435
+- PostgreSQL (Order): 5433
+- PostgreSQL (Inventory): 5434
+- Redis: 6379
+- RabbitMQ AMQP: 5673
+- RabbitMQ Management UI: http://localhost:15673 (ecommerce/ecommerce123)
+- Elasticsearch: http://localhost:9200
+- Kibana: http://localhost:5601
+
+## API Documentation
+
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8080/v3/api-docs
+
+## Дополнительная документация
+
+- [Testing Guide](TESTING_GUIDE.md) - руководство по тестированию API
+- [Project Description](PROJECT_DESCRIPTION_RU.md) - подробное техническое описание
+
+## Сборка проекта
 
 ```bash
-# Остановка всех контейнеров
-docker-compose down
+# Сборка без тестов
+mvn clean install -DskipTests
 
-# Остановка с удалением volumes (данные будут потеряны!)
-docker-compose down -v
-```
+# Сборка с тестами
+mvn clean install
 
-## Проверка работоспособности
-
-```bash
-# PostgreSQL
-docker exec -it postgres-product psql -U ecommerce -d product_db -c "SELECT version();"
-
-# Redis
-docker exec -it ecommerce-redis redis-cli ping
-
-# RabbitMQ
-curl -u ecommerce:ecommerce123 http://localhost:15672/api/overview
-
-# Elasticsearch
-curl http://localhost:9200/_cluster/health?pretty
-```
+# Запуск тестов
+mvn test
+``

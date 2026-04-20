@@ -1,0 +1,1419 @@
+{
+  "info": {
+    "name": "E-commerce Platform API",
+    "description": "Complete API collection for E-commerce Platform microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user-123",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "prod-1",
+      "type": "string"
+    },
+    {
+      "key": "orderNumber",
+      "value": "ORD-2024-001",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "order-test-001",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "API Gateway",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/gateway/health"
+          },
+          "description": "Check gateway health status"
+        },
+        {
+          "name": "Get Services",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/gateway/services"
+          },
+          "description": "List all registered services"
+        },
+        {
+          "name": "Get Routes",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/gateway/routes"
+          },
+          "description": "Get route information"
+        },
+        {
+          "name": "Gateway Info",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/gateway/info"
+          },
+          "description": "Get gateway information"
+        }
+      ]
+    },
+    {
+      "name": "Rate Limiting",
+      "item": [
+        {
+          "name": "Get Rate Limit Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/rate-limit/status"
+          },
+          "description": "Get current rate limiting configuration"
+        },
+        {
+          "name": "Get Rate Limit Headers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/admin/rate-limit/headers"
+          },
+          "description": "Get information about rate limit headers"
+        },
+        {
+          "name": "Test Rate Limit",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "rate-limit", "test"],
+              "query": [
+                {
+                  "key": "keyType",
+                  "value": "ip",
+                  "description": "Key type: ip, user, or session"
+                }
+              ]
+            }
+          },
+          "description": "Test rate limiting (make multiple requests to see it in action)"
+        },
+        {
+          "name": "Reset Rate Limit",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/admin/rate-limit/reset",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyType\": \"ip\",\n  \"key\": \"127.0.0.1\"\n}"
+            }
+          },
+          "description": "Reset rate limit for a specific key"
+        }
+      ]
+    },
+    {
+      "name": "Product Service",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/products",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Product\",\n  \"description\": \"A sample product description\",\n  \"price\": 99.99,\n  \"category\": \"Electronics\",\n  \"tags\": [\"sample\", \"electronics\"],\n  \"imageUrl\": \"https://example.com/image.jpg\"\n}"
+            }
+          },
+          "description": "Create a new product"
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/products"
+          },
+          "description": "Get all products"
+        },
+        {
+          "name": "Get Products by Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Electronics"
+                }
+              ]
+            }
+          },
+          "description": "Get products filtered by category"
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "phone"
+                }
+              ]
+            }
+          },
+          "description": "Search products by name"
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          },
+          "description": "Get a specific product by ID"
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/products/{{productId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product Name\",\n  \"description\": \"Updated description\",\n  \"price\": 149.99,\n  \"category\": \"Electronics\",\n  \"tags\": [\"updated\", \"electronics\"],\n  \"imageUrl\": \"https://example.com/updated-image.jpg\"\n}"
+            }
+          },
+          "description": "Update an existing product"
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/products/{{productId}}"
+          },
+          "description": "Delete a product by ID"
+        }
+      ]
+    },
+    {
+      "name": "Search Service",
+      "item": [
+        {
+          "name": "Search Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "laptop"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Search products with pagination"
+        },
+        {
+          "name": "Search by Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "name", "laptop"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Search products by name"
+        },
+        {
+          "name": "Search by Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "category", "Electronics"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Search products by category"
+        },
+        {
+          "name": "Search by Tags",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "tags"],
+              "query": [
+                {
+                  "key": "tag",
+                  "value": "popular"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Search products by tags"
+        },
+        {
+          "name": "Get All Products (Paginated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Get all products with pagination"
+        },
+        {
+          "name": "Search by Price Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "price-range"],
+              "query": [
+                {
+                  "key": "minPrice",
+                  "value": "10"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "100"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Search products within a price range"
+        },
+        {
+          "name": "Advanced Search with Filters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "advanced"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "laptop"
+                },
+                {
+                  "key": "category",
+                  "value": "Electronics"
+                },
+                {
+                  "key": "tags",
+                  "value": "new,featured"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "50"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "500"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Advanced search with multiple filters"
+        },
+        {
+          "name": "Get Product Suggestions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "suggestions"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "lap"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "description": "Get autocomplete suggestions"
+        },
+        {
+          "name": "Get Recent Products",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "description": "Get recently added products"
+        },
+        {
+          "name": "Count Products by Category",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/search/count/Electronics"
+          },
+          "description": "Count products in a category"
+        },
+        {
+          "name": "Index Product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/search/index",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"prod-1\",\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"Latest Apple smartphone with A17 Pro chip\",\n  \"price\": 999.99,\n  \"category\": \"Electronics\",\n  \"tags\": [\"smartphone\",\"apple\",\"5g\"],\n  \"imageUrl\": \"https://example.com/iphone15.jpg\",\n  \"createdAt\": \"2024-01-01T00:00:00Z\",\n  \"updatedAt\": \"2024-01-01T00:00:00Z\"\n}"
+            }
+          },
+          "description": "Manually index a product in Elasticsearch"
+        },
+        {
+          "name": "Delete Product from Search",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/search/{{productId}}"
+          },
+          "description": "Remove a product from search index"
+        }
+      ]
+    },
+    {
+      "name": "Cart Service",
+      "item": [
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/cart/{{userId}}"
+          },
+          "description": "Get user's cart"
+        },
+        {
+          "name": "Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/items",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"productName\": \"iPhone 15 Pro\",\n  \"price\": 999.99,\n  \"quantity\": 1,\n  \"imageUrl\": \"https://example.com/iphone15.jpg\"\n}"
+            }
+          },
+          "description": "Add an item to the cart"
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/items/{{productId}}",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productName\": \"iPhone 15 Pro\",\n  \"price\": 999.99,\n  \"quantity\": 2,\n  \"imageUrl\": \"https://example.com/iphone15.jpg\"\n}"
+            }
+          },
+          "description": "Update item quantity in cart"
+        },
+        {
+          "name": "Remove Item from Cart",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/items/{{productId}}"
+          },
+          "description": "Remove an item from the cart"
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/clear"
+          },
+          "description": "Clear all items from the cart"
+        },
+        {
+          "name": "Add Product to Cart (with ProductDTO)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/products",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product\": {\n    \"id\": \"prod-1\",\n    \"name\": \"iPhone 15 Pro\",\n    \"description\": \"Latest Apple smartphone with A17 Pro chip\",\n    \"price\": 999.99,\n    \"category\": \"Electronics\",\n    \"tags\": [\"smartphone\",\"apple\",\"5g\"],\n    \"imageUrl\": \"https://example.com/iphone15.jpg\",\n    \"createdAt\": \"2024-01-01T00:00:00Z\",\n    \"updatedAt\": \"2024-01-01T00:00:00Z\"\n  },\n  \"quantity\": 1\n}"
+            }
+          },
+          "description": "Add product to cart using ProductDTO"
+        },
+        {
+          "name": "Delete Cart",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/cart/{{userId}}"
+          },
+          "description": "Delete the entire cart"
+        }
+      ]
+    },
+    {
+      "name": "Inventory Service",
+      "item": [
+        {
+          "name": "Get Inventory by Product ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}"
+          },
+          "description": "Get inventory for a specific product"
+        },
+        {
+          "name": "Get Inventory by Location",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/locations/warehouse-1"
+          },
+          "description": "Get inventory for a specific location"
+        },
+        {
+          "name": "Get Low Stock Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "low-stock"],
+              "query": [
+                {
+                  "key": "threshold",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "description": "Get items with low stock"
+        },
+        {
+          "name": "Get Out of Stock Items",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/out-of-stock"
+          },
+          "description": "Get items that are out of stock"
+        },
+        {
+          "name": "Create Inventory",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"quantity\": 100,\n  \"location\": \"warehouse-1\",\n  \"reservedQuantity\": 0\n}"
+            }
+          },
+          "description": "Create inventory record for a product"
+        },
+        {
+          "name": "Update Inventory Quantity",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}/quantity",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 150\n}"
+            }
+          },
+          "description": "Update inventory quantity for a product"
+        },
+        {
+          "name": "Add Stock",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}/add-stock",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 50\n}"
+            }
+          },
+          "description": "Add stock to a product"
+        },
+        {
+          "name": "Remove Stock",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}/remove-stock",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10\n}"
+            }
+          },
+          "description": "Remove stock from a product"
+        },
+        {
+          "name": "Check if In Stock",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}/in-stock"
+          },
+          "description": "Check if product is in stock"
+        },
+        {
+          "name": "Check Stock Availability",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "products", "{{productId}}", "stock-check"],
+              "query": [
+                {
+                  "key": "requiredQuantity",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "description": "Check if enough stock is available"
+        },
+        {
+          "name": "Delete Inventory",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}"
+          },
+          "description": "Delete inventory record"
+        },
+        {
+          "name": "Reserve Stock",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/reserve",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"quantity\": 2,\n  \"orderId\": \"order-test-001\"\n}"
+            }
+          },
+          "description": "Reserve stock for an order"
+        },
+        {
+          "name": "Release Stock",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/release",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"quantity\": 2,\n  \"orderId\": \"order-test-001\"\n}"
+            }
+          },
+          "description": "Release reserved stock"
+        },
+        {
+          "name": "Confirm Reservation",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/confirm-reservation",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"quantity\": 2,\n  \"orderId\": \"order-test-001\"\n}"
+            }
+          },
+          "description": "Confirm stock reservation (converts reserved to sold)"
+        },
+        {
+          "name": "Cancel Reservation",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory/cancel-reservation",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"quantity\": 2,\n  \"orderId\": \"order-test-001\"\n}"
+            }
+          },
+          "description": "Cancel stock reservation (returns to available stock)"
+        },
+        {
+          "name": "Get Reserved Items",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/reserved"
+          },
+          "description": "Get all reserved items"
+        },
+        {
+          "name": "Get Reserved Items by Order",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/reserved/orders/{{orderId}}"
+          },
+          "description": "Get reserved items for a specific order"
+        },
+        {
+          "name": "Get Available Stock",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/available/{{productId}}"
+          },
+          "description": "Get available stock quantity for a product"
+        }
+      ]
+    },
+    {
+      "name": "Order Service",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-123\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"productName\": \"iPhone 15 Pro\",\n      \"price\": 999.99,\n      \"quantity\": 1,\n      \"imageUrl\": \"https://example.com/iphone15.jpg\"\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"billingAddress\": \"123 Main St, City, Country\"\n}"
+            }
+          },
+          "description": "Create a new order"
+        },
+        {
+          "name": "Create Order with Saga",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/with-saga",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-123\",\n  \"items\": [\n    {\n      \"productId\": \"prod-1\",\n      \"productName\": \"iPhone 15 Pro\",\n      \"price\": 999.99,\n      \"quantity\": 1,\n      \"imageUrl\": \"https://example.com/iphone15.jpg\"\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"billingAddress\": \"123 Main St, City, Country\"\n}"
+            }
+          },
+          "description": "Create order with distributed transaction (Saga pattern)"
+        },
+        {
+          "name": "Create Order from Cart",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/from-cart",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-123\",\n  \"cartItems\": [\n    {\n      \"productId\": \"prod-1\",\n      \"productName\": \"iPhone 15 Pro\",\n      \"price\": 999.99,\n      \"quantity\": 1,\n      \"imageUrl\": \"https://example.com/iphone15.jpg\"\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"billingAddress\": \"123 Main St, City, Country\"\n}"
+            }
+          },
+          "description": "Create order directly from cart items"
+        },
+        {
+          "name": "Get Order by Order Number",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}"
+          },
+          "description": "Get order details by order number"
+        },
+        {
+          "name": "Get User Order",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/users/{{userId}}/orders/{{orderNumber}}"
+          },
+          "description": "Get specific order for a user"
+        },
+        {
+          "name": "Get Orders by User ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/users/{{userId}}"
+          },
+          "description": "Get all orders for a user"
+        },
+        {
+          "name": "Get Orders by Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/status/PENDING"
+          },
+          "description": "Get orders filtered by status (PENDING, CONFIRMED, CANCELLED, SHIPPED, DELIVERED)"
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/status",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            }
+          },
+          "description": "Update order status"
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/cancel"
+          },
+          "description": "Cancel an order"
+        },
+        {
+          "name": "Confirm Order",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/confirm"
+          },
+          "description": "Confirm an order"
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}"
+          },
+          "description": "Delete an order"
+        },
+        {
+          "name": "Get Order Saga Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/saga"
+          },
+          "description": "Get saga transaction status for an order"
+        },
+        {
+          "name": "Retry Failed Saga",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/retry-saga"
+          },
+          "description": "Retry a failed saga transaction"
+        },
+        {
+          "name": "Get Order Statistics",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/statistics"
+          },
+          "description": "Get order statistics (counts by status)"
+        },
+        {
+          "name": "Get Failed Saga Orders",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/failed-sagas"
+          },
+          "description": "Get orders with failed saga transactions"
+        }
+      ]
+    },
+    {
+      "name": "Recommendation Service - Popular Products",
+      "item": [
+        {
+          "name": "Get Top Popular Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/popular"
+          },
+          "description": "Get top popular products"
+        },
+        {
+          "name": "Get Popular Products by Category",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/popular/category/Electronics"
+          },
+          "description": "Get popular products in a specific category"
+        },
+        {
+          "name": "Get Trending Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/trending"
+          },
+          "description": "Get trending products"
+        },
+        {
+          "name": "Get Best Selling Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/bestselling"
+          },
+          "description": "Get best selling products"
+        },
+        {
+          "name": "Get Highly Rated Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/highrated"
+          },
+          "description": "Get highly rated products"
+        },
+        {
+          "name": "Get Products by Minimum Score",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/popular/score/8.5"
+          },
+          "description": "Get products with popularity score above threshold"
+        },
+        {
+          "name": "Add or Update Popular Product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/popular",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"prod-1\",\n  \"productName\": \"iPhone 15 Pro\",\n  \"productDescription\": \"Latest Apple smartphone with A17 Pro chip\",\n  \"category\": \"Electronics\",\n  \"price\": 999.99,\n  \"imageUrl\": \"https://example.com/iphone15.jpg\"\n}"
+            }
+          },
+          "description": "Add or update a popular product"
+        },
+        {
+          "name": "Increment View Count",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/popular/{{productId}}/view"
+          },
+          "description": "Increment view count for a product"
+        },
+        {
+          "name": "Increment Purchase Count",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/popular/{{productId}}/purchase"
+          },
+          "description": "Increment purchase count for a product"
+        },
+        {
+          "name": "Update Rating",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/recommendations/popular/{{productId}}/rating",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4.5\n}"
+            }
+          },
+          "description": "Update product rating"
+        },
+        {
+          "name": "Delete Popular Product",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/recommendations/popular/{{productId}}"
+          },
+          "description": "Delete a product from popular products"
+        },
+        {
+          "name": "Get All Popular Products",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/popular/all"
+          },
+          "description": "Get all popular products"
+        }
+      ]
+    },
+    {
+      "name": "Recommendation Service - Personal Recommendations",
+      "item": [
+        {
+          "name": "Get Personalized Recommendations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "recommendations", "personal", "{{userId}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "description": "Get personalized recommendations for a user"
+        },
+        {
+          "name": "Track User Activity",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/personal/activity",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-123\",\n  \"productId\": \"prod-1\",\n  \"productName\": \"iPhone 15 Pro\",\n  \"category\": \"Electronics\",\n  \"activityType\": \"VIEW\",\n  \"sessionId\": \"session-456\"\n}"
+            }
+          },
+          "description": "Track user activity for recommendations (activityType: VIEW, CLICK, PURCHASE, ADD_TO_CART)"
+        },
+        {
+          "name": "Track Detailed User Activity",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/personal/activity/detailed",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user-123\",\n  \"productId\": \"prod-1\",\n  \"productName\": \"iPhone 15 Pro\",\n  \"category\": \"Electronics\",\n  \"activityType\": \"PURCHASE\",\n  \"sessionId\": \"session-456\",\n  \"price\": 999.99,\n  \"quantity\": 1\n}"
+            }
+          },
+          "description": "Track detailed user activity with price and quantity"
+        },
+        {
+          "name": "Mark Recommendation as Clicked",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/personal/{{userId}}/click/{{productId}}"
+          },
+          "description": "Mark a recommended product as clicked"
+        },
+        {
+          "name": "Mark Recommendation as Purchased",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/personal/{{userId}}/purchase/{{productId}}"
+          },
+          "description": "Mark a recommended product as purchased"
+        },
+        {
+          "name": "Get Recommendation Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/recommendations/personal/{{userId}}/stats"
+          },
+          "description": "Get recommendation statistics for a user"
+        },
+        {
+          "name": "Cleanup Expired Recommendations",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/recommendations/personal/cleanup"
+          },
+          "description": "Clean up expired recommendations"
+        }
+      ]
+    },
+    {
+      "name": "Complete Order Flow with Saga",
+      "item": [
+        {
+          "name": "1. Create Product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/products",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Laptop\",\n  \"description\": \"High-performance laptop for testing\",\n  \"price\": 1299.99,\n  \"category\": \"Electronics\",\n  \"tags\": [\"laptop\", \"computer\", \"test\"],\n  \"imageUrl\": \"https://example.com/laptop.jpg\"\n}"
+            }
+          },
+          "description": "Step 1: Create a product - this will trigger events to Search Service and Inventory Service"
+        },
+        {
+          "name": "2. Create Inventory for Product",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 100,\n  \"location\": \"warehouse-1\",\n  \"reservedQuantity\": 0\n}"
+            }
+          },
+          "description": "Step 2: Create inventory record for the product (replace {{productId}} with actual product ID from step 1)"
+        },
+        {
+          "name": "3. Add Item to Cart",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/items",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"productName\": \"iPhone 15 Pro\",\n  \"price\": 999.99,\n  \"quantity\": 1,\n  \"imageUrl\": \"https://example.com/iphone15.jpg\"\n}"
+            }
+          },
+          "description": "Step 3: Add product to cart (replace {{productId}} with actual product ID from step 1)"
+        },
+        {
+          "name": "4. Get Cart",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/cart/{{userId}}"
+          },
+          "description": "Step 4: Verify cart contents"
+        },
+        {
+          "name": "5. Create Order with Saga",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/with-saga",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Test Laptop\",\n      \"price\": 1299.99,\n      \"quantity\": 2,\n      \"imageUrl\": \"https://example.com/laptop.jpg\"\n    }\n  ],\n  \"shippingAddress\": \"123 Main St, City, Country\",\n  \"billingAddress\": \"123 Main St, City, Country\"\n}"
+            }
+          },
+          "description": "Step 5: Create order with Saga pattern - this triggers: inventory reservation → payment → confirmation → notification"
+        },
+        {
+          "name": "6. Get Order Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}"
+          },
+          "description": "Step 6: Check order status (replace {{orderNumber}} with actual order number from step 5)"
+        },
+        {
+          "name": "7. Get Saga Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/saga"
+          },
+          "description": "Step 7: Check Saga transaction status (replace {{orderNumber}} with actual order number from step 5)"
+        },
+        {
+          "name": "8. Check Inventory Reservation",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}"
+          },
+          "description": "Step 8: Verify inventory was reserved (replace {{productId}} with actual product ID)"
+        },
+        {
+          "name": "9. Get Reserved Items by Order",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/reserved/orders/{{orderId}}"
+          },
+          "description": "Step 9: Check reserved items for this order (replace {{orderId}} with actual order ID)"
+        },
+        {
+          "name": "10. Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/cart/{{userId}}/clear"
+          },
+          "description": "Step 10: Clear cart after successful order"
+        }
+      ]
+    },
+    {
+      "name": "Compensation Flow - Order Cancellation",
+      "item": [
+        {
+          "name": "1. Create Product for Cancellation Test",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/products",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cancellation Test Product\",\n  \"description\": \"Product for testing compensation flow\",\n  \"price\": 99.99,\n  \"category\": \"Test\",\n  \"tags\": [\"test\", \"cancellation\"],\n  \"imageUrl\": \"https://example.com/test.jpg\"\n}"
+            }
+          },
+          "description": "Step 1: Create a product for cancellation test"
+        },
+        {
+          "name": "2. Create Inventory",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/inventory",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 50,\n  \"location\": \"warehouse-1\",\n  \"reservedQuantity\": 0\n}"
+            }
+          },
+          "description": "Step 2: Create inventory with limited stock"
+        },
+        {
+          "name": "3. Create Order with Saga (for cancellation)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/with-saga",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Cancellation Test Product\",\n      \"price\": 99.99,\n      \"quantity\": 5,\n      \"imageUrl\": \"https://example.com/test.jpg\"\n    }\n  ],\n  \"shippingAddress\": \"456 Test St, Test City, Test Country\",\n  \"billingAddress\": \"456 Test St, Test City, Test Country\"\n}"
+            }
+          },
+          "description": "Step 3: Create order that will be cancelled"
+        },
+        {
+          "name": "4. Cancel Order",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}/cancel"
+          },
+          "description": "Step 4: Cancel the order - this triggers compensation flow: release inventory, refund payment, send notification"
+        },
+        {
+          "name": "5. Verify Order Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/orders/{{orderNumber}}"
+          },
+          "description": "Step 5: Verify order status is CANCELLED"
+        },
+        {
+          "name": "6. Verify Inventory Released",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/products/{{productId}}"
+          },
+          "description": "Step 6: Verify inventory was released back to available stock"
+        },
+        {
+          "name": "7. Check No Active Reservations",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/inventory/reserved/orders/{{orderId}}"
+          },
+          "description": "Step 7: Verify reservation was deleted"
+        }
+      ]
+    }
+  ]
+}
